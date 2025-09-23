@@ -1,29 +1,3 @@
-# Environment variables
-.env
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-venv/
-.venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Node modules
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build directories
-build/
-dist/
-
-# IDE
 .vscode/
 .idea/
 *.swp
@@ -33,7 +7,7 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Data directories (optional - si quieres excluir las imágenes)
+# Data directories (opcional)
 data/images/
 data/uploads/
 data/results/
