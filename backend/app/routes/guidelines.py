@@ -11,11 +11,17 @@ async def upload_guideline(file: UploadFile = File(...)):
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
     
+    # Get project root path (go up from backend/app/routes/)
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent.parent
+    uploads_dir = project_root / "data" / "uploads"
+    
+    # Create uploads directory
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    
     file_id = str(uuid.uuid4())
     filename = f"{file_id}_{file.filename}"
-    file_path = Path("data/uploads") / filename
-    
-    os.makedirs("data/uploads", exist_ok=True)
+    file_path = uploads_dir / filename
     
     with open(file_path, "wb") as buffer:
         content = await file.read()

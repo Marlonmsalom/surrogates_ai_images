@@ -13,10 +13,17 @@ class ImageAnalyzer:
         self.settings = get_settings()
         self.project_root = Path(__file__).parent.parent.parent.parent
         self.images_dir = self.project_root / "data" / "images"
+        self.uploads_dir = self.project_root / "data" / "uploads"
     
     async def analyze_images(self, guideline_path: str, job_id: str) -> Dict[str, Any]:
         try:
-            pdf_content = self._read_pdf_content(guideline_path)
+            # Convert relative path to absolute path if needed
+            if not Path(guideline_path).is_absolute():
+                guideline_full_path = self.project_root / guideline_path
+            else:
+                guideline_full_path = Path(guideline_path)
+                
+            pdf_content = self._read_pdf_content(str(guideline_full_path))
             if not pdf_content:
                 return {"success": False, "message": "Could not read PDF content"}
             

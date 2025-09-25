@@ -33,3 +33,10 @@ data/results/
 
 # Test files
 test_*.py
+*_broken.py
+*_backup.py
+
+# Temporary files
+*.tmp
+*.temp
+.env

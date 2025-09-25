@@ -1,8 +1,9 @@
 import asyncio
+import os
+import json
+import requests
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from openai import OpenAI
-from ..core.config import get_settings
 
 class AIProvider(ABC):
     @abstractmethod
@@ -11,58 +12,98 @@ class AIProvider(ABC):
 
 class OpenAIProvider(AIProvider):
     def __init__(self):
+        from ..core.config import get_settings
         self.settings = get_settings()
-        # Simplificar inicialización - solo API key
-        self.client = OpenAI(api_key=self.settings.OPENAI_API_KEY)
+        self.api_key = self.settings.OPENAI_API_KEY
+        self.base_url = "https://api.openai.com/v1/chat/completions"
+        print("OpenAI provider initialized with requests-based approach")
     
     async def analyze_images(self, images_base64: List[str], prompt: str) -> Dict[str, Any]:
         try:
-            messages = [
-                {
-                    "role": "system",
-                    "content": "You are an expert image analyst. Analyze the provided images based on the given criteria and return a detailed response."
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt}
-                    ] + [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{img_b64}"
-                            }
-                        } for img_b64 in images_base64
-                    ]
-                }
-            ]
+            print(f"Starting analysis with {len(images_base64)} images")
             
-            # Llamada síncrona simple
-            response = self.client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,
-                max_tokens=1000
-            )
+            # Preparar contenido
+            content = [{"type": "text", "text": prompt}]
             
-            usage_info = {}
-            if response.usage:
-                usage_info = {
-                    'prompt_tokens': response.usage.prompt_tokens,
-                    'completion_tokens': response.usage.completion_tokens,
-                    'total_tokens': response.usage.total_tokens
-                }
+            # Máximo 3 imágenes
+            limited_images = images_base64[:3]
+            print(f"Processing {len(limited_images)} images")
             
-            return {
-                'success': True,
-                'response': response.choices[0].message.content,
-                'usage': usage_info
+            for i, img_b64 in enumerate(limited_images):
+                content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{img_b64}",
+                        "detail": "low"
+                    }
+                })
+                print(f"Added image {i+1}")
+            
+            # Payload para la API
+            payload = {
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are an expert brand guidelines analyst. Rate each image from 0-10 based on brand compliance."
+                    },
+                    {
+                        "role": "user",
+                        "content": content
+                    }
+                ],
+                "max_tokens": 1500,
+                "temperature": 0.1
             }
             
+            # Headers
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            }
+            
+            print("Sending request to OpenAI API...")
+            
+            # Llamada HTTP directa
+            response = requests.post(
+                self.base_url, 
+                headers=headers, 
+                json=payload, 
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                print("Response received from OpenAI")
+                
+                usage_info = {}
+                if 'usage' in data:
+                    usage_info = {
+                        'prompt_tokens': data['usage'].get('prompt_tokens', 0),
+                        'completion_tokens': data['usage'].get('completion_tokens', 0),
+                        'total_tokens': data['usage'].get('total_tokens', 0)
+                    }
+                
+                return {
+                    'success': True,
+                    'response': data['choices'][0]['message']['content'],
+                    'usage': usage_info
+                }
+            else:
+                error_msg = f"API request failed: {response.status_code} - {response.text}"
+                print(error_msg)
+                return {
+                    'success': False,
+                    'error': error_msg,
+                    'response': None
+                }
+                
         except Exception as e:
-            print(f"OpenAI API Error: {e}")
+            error_msg = f"Request Error: {str(e)}"
+            print(error_msg)
             return {
                 'success': False,
-                'error': str(e),
+                'error': error_msg,
                 'response': None
             }
 
