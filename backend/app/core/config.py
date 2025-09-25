@@ -13,7 +13,9 @@ class Settings(BaseSettings):
     DOWNLOAD_TIMEOUT: int = 30
     
     class Config:
-        env_file = "../.env"  # Buscar .env en la raíz del proyecto
+        env_file = "../.env"
+        env_file_encoding = 'utf-8'
+        case_sensitive = False
 
 @lru_cache()
 def get_settings():
