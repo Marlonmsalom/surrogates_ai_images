@@ -1,3 +1,4 @@
+# IDEs & editors
 .vscode/
 .idea/
 *.swp
@@ -7,10 +8,28 @@
 .DS_Store
 Thumbs.db
 
-# Data directories (opcional)
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.so
+
+# Node / React
+node_modules/
+build/
+dist/
+
+# Env files & config
+.env
+.env.local
+
+# Data directories
 data/images/
 data/uploads/
 data/results/
+
+# Logs
+*.log
 
 # Test files
 test_*.py
