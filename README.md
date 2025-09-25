@@ -37,3 +37,9 @@ data/            - Datos del proyecto
   uploads/       - PDFs de guías subidos
   results/       - Resultados de análisis
 .env.example     - Template de configuración
+
+## Variables de Entorno (Recomendado)
+
+Alternativamente, puedes configurar las API keys como variables de entorno del sistema:
+
+Esta opción es más segura y conveniente para desarrollo local.
