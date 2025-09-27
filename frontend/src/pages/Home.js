@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Container,
@@ -16,25 +16,33 @@ import {
   InputAdornment,
   LinearProgress,
   Fade,
-  Zoom
+  Zoom,
+  AppBar,
+  Toolbar,
+  Menu,
+  MenuItem
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchIcon from '@mui/icons-material/Search';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LanguageIcon from '@mui/icons-material/Language';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import api from '../services/api';
 
 // Paleta moderna inspirada en Jeton
 const colors = {
   primary: '#E91E63',         // Pink vibrante
   secondary: '#FF7043',       // Coral/naranja
-  accent: '#F06292',          // Rosa más suave
+  accent: '#F8BBD9',          // Rosa muy suave para botones
+  tertiary: '#FFE0B2',        // Melocotón suave
   background: '#FFFFFF',      // Blanco puro
   surface: '#FFFFFF',         // Blanco
   text: '#FFFFFF',            // Blanco para texto sobre gradiente
@@ -50,6 +58,42 @@ const PageContainer = styled('div')({
   background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
   position: 'relative',
   overflow: 'hidden',
+});
+
+const TopBar = styled(AppBar)({
+  background: 'transparent',
+  boxShadow: 'none',
+  position: 'absolute',
+  top: 0,
+  zIndex: 1000,
+});
+
+const HeaderButton = styled(Button)({
+  color: colors.text,
+  textTransform: 'none',
+  fontWeight: 500,
+  fontSize: '16px',
+  padding: '8px 16px',
+  borderRadius: '12px',
+  marginLeft: '12px',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+});
+
+const SignUpButton = styled(Button)({
+  backgroundColor: colors.text,
+  color: colors.primary,
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '16px',
+  padding: '10px 20px',
+  borderRadius: '16px',
+  marginLeft: '12px',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    transform: 'translateY(-1px)',
+  },
 });
 
 const HeroSection = styled(Box)({
@@ -71,6 +115,7 @@ const GlassCard = styled(Box)({
   boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
   width: '100%',
   maxWidth: '700px',
+  margin: '0 auto',
 });
 
 const SearchField = styled(TextField)({
@@ -106,18 +151,18 @@ const ModernButton = styled(Button)({
   fontWeight: 700,
   fontSize: '16px',
   padding: '16px 32px',
-  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.primary} 100%)`,
-  color: colors.text,
+  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.tertiary} 100%)`,
+  color: colors.textDark,
   fontFamily: '"Inter", "SF Pro Display", sans-serif',
   height: '56px',
   minWidth: '180px',
   border: 'none',
-  boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
+  boxShadow: '0 8px 25px rgba(248, 187, 217, 0.4)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
+    background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent} 100%)`,
     transform: 'translateY(-3px)',
-    boxShadow: '0 15px 40px rgba(233, 30, 99, 0.4)',
+    boxShadow: '0 15px 40px rgba(248, 187, 217, 0.5)',
   },
   '&:disabled': {
     background: 'rgba(255, 255, 255, 0.3)',
@@ -144,6 +189,20 @@ const SecondaryButton = styled(Button)({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     transform: 'translateY(-2px)',
     boxShadow: '0 10px 30px rgba(255, 255, 255, 0.2)',
+  },
+});
+
+const SettingsButton = styled(IconButton)({
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  color: colors.text,
+  width: '56px',
+  height: '56px',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  backdropFilter: 'blur(10px)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-2px)',
   },
 });
 
@@ -178,6 +237,7 @@ const ResultsSection = styled(Box)({
   minHeight: '100vh',
   paddingTop: '2rem',
   paddingBottom: '4rem',
+  marginTop: '0',
 });
 
 const ImageCard = styled(Card)(({ score, isAnalyzed }) => ({
@@ -236,6 +296,23 @@ const WinnerBadge = styled(Box)({
   zIndex: 2,
 });
 
+const FloatingActionButton = styled(IconButton)({
+  position: 'fixed',
+  bottom: '2rem',
+  right: '2rem',
+  backgroundColor: colors.primary,
+  color: colors.text,
+  width: '60px',
+  height: '60px',
+  boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
+  zIndex: 1000,
+  '&:hover': {
+    backgroundColor: colors.secondary,
+    transform: 'translateY(-2px)',
+    boxShadow: '0 12px 35px rgba(233, 30, 99, 0.4)',
+  },
+});
+
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [guidelines, setGuidelines] = useState([]);
@@ -248,6 +325,11 @@ const Home = () => {
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
+  const [settingsAnchor, setSettingsAnchor] = useState(null);
+  const [showResults, setShowResults] = useState(false);
+  
+  const heroRef = useRef(null);
+  const resultsRef = useRef(null);
 
   const handleNext = () => {
     if (!searchQuery.trim()) {
@@ -347,8 +429,16 @@ const Home = () => {
           
           setProgress(100);
           setProgressMessage('Analysis complete!');
-          setCurrentStep('results');
           setIsProcessing(false);
+          setShowResults(true);
+          
+          // Auto scroll to results
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }, 500);
         }
       };
 
@@ -379,6 +469,20 @@ const Home = () => {
     setAnalyzedImages(new Map());
     setError('');
     setIsProcessing(false);
+    setShowResults(false);
+    
+    // Scroll to top
+    heroRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const scrollToTop = () => {
+    heroRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
   };
 
   const getTopImages = () => {
@@ -388,153 +492,48 @@ const Home = () => {
     });
   };
 
-  if (currentStep === 'results') {
-    return (
-      <ResultsSection>
-        <Container maxWidth="xl" sx={{ pt: 4 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-            <Typography 
-              variant="h3" 
-              sx={{ 
-                color: colors.textDark, 
-                fontWeight: 800,
-                fontFamily: '"Inter", "SF Pro Display", sans-serif',
-              }}
-            >
-              Analysis Results
-            </Typography>
-            <Button 
-              variant="outlined" 
-              onClick={resetFlow}
-              sx={{ 
-                color: colors.primary, 
-                borderColor: colors.primary,
-                '&:hover': { backgroundColor: colors.primary, color: 'white' }
-              }}
-            >
-              New Analysis
-            </Button>
-          </Box>
-
-          {getTopImages().length > 0 && (
-            <Box mb={6}>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  color: colors.textDark, 
-                  fontWeight: 700, 
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2
-                }}
-              >
-                <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
-                Top Performers (Score 7+)
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)', mb: 4 }}>
-                {getTopImages().length} images perfectly match your brand guidelines
-              </Typography>
-            </Box>
-          )}
-
-          <Grid container spacing={3}>
-            {images.map((image, index) => {
-              const score = analyzedImages.get(image.filename);
-              const isAnalyzed = score !== undefined;
-              const isWinner = index === 0 && isAnalyzed && score >= 7;
-              
-              return (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ 
-                      duration: 0.5,
-                      type: "spring",
-                      stiffness: 80,
-                      damping: 15,
-                      delay: index * 0.1
-                    }}
-                  >
-                    <ImageCard 
-                      score={score}
-                      isAnalyzed={isAnalyzed}
-                      onClick={() => setSelectedImage(image)}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <CardMedia
-                        component="img"
-                        height="260"
-                        image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
-                        alt={image.description}
-                      />
-                      
-                      {isWinner && (
-                        <WinnerBadge>
-                          <EmojiEventsIcon sx={{ fontSize: '16px' }} />
-                          Winner
-                        </WinnerBadge>
-                      )}
-                      
-                      {isAnalyzed && (
-                        <ScoreBadge score={score}>
-                          {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
-                          {score}/10
-                        </ScoreBadge>
-                      )}
-                    </ImageCard>
-                  </motion.div>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Container>
-
-        <Dialog
-          open={!!selectedImage}
-          onClose={() => setSelectedImage(null)}
-          maxWidth="lg"
-          fullWidth
-          PaperProps={{
-            sx: {
-              borderRadius: '24px',
-              overflow: 'hidden',
-            }
-          }}
-        >
-          <DialogContent sx={{ p: 0, position: 'relative' }}>
-            <IconButton
-              onClick={() => setSelectedImage(null)}
-              sx={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                color: 'white',
-                zIndex: 1,
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            
-            {selectedImage && (
-              <img
-                src={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(selectedImage.filename)}`}
-                alt={selectedImage.description}
-                style={{ width: '100%', height: 'auto' }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-      </ResultsSection>
-    );
-  }
-
   return (
     <PageContainer>
-      <HeroSection>
+      {/* Header */}
+      <TopBar position="fixed">
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box display="flex" alignItems="center">
+            <LanguageIcon sx={{ color: colors.text, mr: 1 }} />
+            <Typography sx={{ color: colors.text, fontWeight: 600 }}>EN</Typography>
+          </Box>
+          
+          <Box>
+            <HeaderButton>Log in</HeaderButton>
+            <SignUpButton>Sign up</SignUpButton>
+            <SettingsButton 
+              onClick={(e) => setSettingsAnchor(e.currentTarget)}
+              sx={{ ml: 1 }}
+            >
+              <SettingsIcon />
+            </SettingsButton>
+          </Box>
+        </Toolbar>
+      </TopBar>
+
+      {/* Settings Menu */}
+      <Menu
+        anchorEl={settingsAnchor}
+        open={Boolean(settingsAnchor)}
+        onClose={() => setSettingsAnchor(null)}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            mt: 1,
+          }
+        }}
+      >
+        <MenuItem onClick={() => setSettingsAnchor(null)}>Image Provider</MenuItem>
+        <MenuItem onClick={() => setSettingsAnchor(null)}>Image Count</MenuItem>
+        <MenuItem onClick={() => setSettingsAnchor(null)}>Language</MenuItem>
+      </Menu>
+
+      {/* Hero Section */}
+      <HeroSection ref={heroRef}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -592,7 +591,7 @@ const Home = () => {
                       What images are you looking for?
                     </Typography>
                     
-                    <Box display="flex" gap={2} mb={3}>
+                    <Box display="flex" alignItems="center" gap={2} mb={3}>
                       <SearchField
                         fullWidth
                         placeholder="e.g., modern office, happy people, nature..."
@@ -780,6 +779,159 @@ const Home = () => {
           </motion.div>
         </Container>
       </HeroSection>
+
+      {/* Results Section */}
+      {showResults && (
+        <ResultsSection ref={resultsRef}>
+          <Container maxWidth="xl" sx={{ pt: 4 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+              <Typography 
+                variant="h3" 
+                sx={{ 
+                  color: colors.textDark, 
+                  fontWeight: 800,
+                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+                }}
+              >
+                Analysis Results
+              </Typography>
+              <Button 
+                variant="outlined" 
+                onClick={resetFlow}
+                startIcon={<RefreshIcon />}
+                sx={{ 
+                  color: colors.primary, 
+                  borderColor: colors.primary,
+                  borderRadius: '12px',
+                  '&:hover': { backgroundColor: colors.primary, color: 'white' }
+                }}
+              >
+                New Analysis
+              </Button>
+            </Box>
+
+            {getTopImages().length > 0 && (
+              <Box mb={6}>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    color: colors.textDark, 
+                    fontWeight: 700, 
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}
+                >
+                  <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
+                  Top Performers (Score 7+)
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)', mb: 4 }}>
+                  {getTopImages().length} images perfectly match your brand guidelines
+                </Typography>
+              </Box>
+            )}
+
+            <Grid container spacing={3}>
+              {images.map((image, index) => {
+                const score = analyzedImages.get(image.filename);
+                const isAnalyzed = score !== undefined;
+                const isWinner = index === 0 && isAnalyzed && score >= 7;
+                
+                return (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.5,
+                        type: "spring",
+                        stiffness: 80,
+                        damping: 15,
+                        delay: index * 0.1
+                      }}
+                    >
+                      <ImageCard 
+                        score={score}
+                        isAnalyzed={isAnalyzed}
+                        onClick={() => setSelectedImage(image)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <CardMedia
+                          component="img"
+                          height="260"
+                          image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
+                          alt={image.description}
+                        />
+                        
+                        {isWinner && (
+                          <WinnerBadge>
+                            <EmojiEventsIcon sx={{ fontSize: '16px' }} />
+                            Winner
+                          </WinnerBadge>
+                        )}
+                        
+                        {isAnalyzed && (
+                          <ScoreBadge score={score}>
+                            {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
+                            {score}/10
+                          </ScoreBadge>
+                        )}
+                      </ImageCard>
+                    </motion.div>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Container>
+        </ResultsSection>
+      )}
+
+      {/* Floating Action Button */}
+      {showResults && (
+        <FloatingActionButton onClick={scrollToTop}>
+          <KeyboardArrowUpIcon />
+        </FloatingActionButton>
+      )}
+
+      {/* Image Modal */}
+      <Dialog
+        open={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '24px',
+            overflow: 'hidden',
+          }
+        }}
+      >
+        <DialogContent sx={{ p: 0, position: 'relative' }}>
+          <IconButton
+            onClick={() => setSelectedImage(null)}
+            sx={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              color: 'white',
+              zIndex: 1,
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          
+          {selectedImage && (
+            <img
+              src={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(selectedImage.filename)}`}
+              alt={selectedImage.description}
+              style={{ width: '100%', height: 'auto' }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 };
