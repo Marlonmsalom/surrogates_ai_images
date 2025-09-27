@@ -336,35 +336,61 @@ const FloatingActionButton = styled(IconButton)({
   },
 });
 
-// Nuevos componentes para el modal mejorado
+// Componentes del modal MEJORADOS para pantalla casi completa
 const ImageModalFrame = styled(Box)({
   display: 'flex',
   flexDirection: 'row',
-  minHeight: '60vh',
-  maxHeight: '80vh',
+  minHeight: '92vh',
+  maxHeight: '95vh',
+  width: '98vw',
+  maxWidth: '1800px',
   backgroundColor: colors.surface,
-  borderRadius: '20px',
+  borderRadius: '24px',
   overflow: 'hidden',
-  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+  boxShadow: '0 25px 80px rgba(0, 0, 0, 0.25)',
+  '@media (max-width: 1024px)': {
+    flexDirection: 'column',
+    width: '95vw',
+    maxHeight: '90vh',
+  },
 });
 
 const ImageSection = styled(Box)({
-  flex: '1.2',
+  flex: '1.8',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: '#f8fafc',
   position: 'relative',
-  minHeight: '400px',
+  minHeight: '700px',
+  '@media (max-width: 1024px)': {
+    flex: 'none',
+    minHeight: '60vh',
+    maxHeight: '60vh',
+  },
+  '@media (max-width: 768px)': {
+    minHeight: '50vh',
+    maxHeight: '50vh',
+  },
 });
 
 const InfoSection = styled(Box)({
-  flex: '0.8',
-  padding: '2rem',
+  flex: '0.7',
+  padding: '2.5rem',
   backgroundColor: colors.surface,
   display: 'flex',
   flexDirection: 'column',
   gap: '1.5rem',
+  overflowY: 'auto',
+  '@media (max-width: 1024px)': {
+    flex: 'none',
+    maxHeight: '30vh',
+    padding: '1.5rem',
+  },
+  '@media (max-width: 768px)': {
+    padding: '1rem',
+    maxHeight: '40vh',
+  },
 });
 
 const Home = () => {
@@ -1286,17 +1312,19 @@ const Home = () => {
         </FloatingActionButton>
       )}
 
-      {/* Nuevo Modal Mejorado con Marco */}
+      {/* Modal MEJORADO - Casi pantalla completa */}
       <Dialog
         open={!!selectedImage}
         onClose={() => setSelectedImage(null)}
-        maxWidth="md"
+        maxWidth={false}
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: '20px',
+            borderRadius: '24px',
             overflow: 'hidden',
-            maxHeight: '90vh',
+            maxHeight: '98vh',
+            maxWidth: '98vw',
+            margin: '1vh auto',
           }
         }}
       >
@@ -1305,20 +1333,26 @@ const Home = () => {
             onClick={() => setSelectedImage(null)}
             sx={{
               position: 'absolute',
-              top: 16,
-              right: 16,
-              backgroundColor: 'rgba(0,0,0,0.7)',
+              top: 24,
+              right: 24,
+              backgroundColor: 'rgba(0,0,0,0.8)',
               color: 'white',
-              zIndex: 10,
-              '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+              zIndex: 100,
+              width: '56px',
+              height: '56px',
+              transition: 'all 0.3s ease',
+              '&:hover': { 
+                backgroundColor: 'rgba(0,0,0,0.95)',
+                transform: 'scale(1.1)'
+              }
             }}
           >
-            <CloseIcon />
+            <CloseIcon sx={{ fontSize: '24px' }} />
           </IconButton>
           
           {selectedImage && (
             <ImageModalFrame>
-              {/* Sección de la imagen */}
+              {/* Sección de la imagen - MUCHO MÁS GRANDE */}
               <ImageSection>
                 <img
                   src={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(selectedImage.filename)}`}
@@ -1327,7 +1361,7 @@ const Home = () => {
                     maxWidth: '100%', 
                     maxHeight: '100%',
                     objectFit: 'contain',
-                    borderRadius: '12px'
+                    borderRadius: '16px'
                   }}
                 />
               </ImageSection>
@@ -1336,9 +1370,9 @@ const Home = () => {
               <InfoSection>
                 <Box>
                   <Typography 
-                    variant="h6" 
+                    variant="h5" 
                     sx={{ 
-                      fontWeight: 700, 
+                      fontWeight: 800, 
                       color: colors.textDark,
                       mb: 1,
                       fontFamily: '"Inter", "SF Pro Display", sans-serif'
@@ -1347,11 +1381,12 @@ const Home = () => {
                     Image Details
                   </Typography>
                   <Typography 
-                    variant="body2" 
+                    variant="body1" 
                     sx={{ 
                       color: 'rgba(26, 26, 26, 0.7)',
                       mb: 2,
-                      lineHeight: 1.5
+                      lineHeight: 1.5,
+                      fontSize: '16px'
                     }}
                   >
                     {selectedImage.description || selectedImage.filename}
@@ -1371,7 +1406,8 @@ const Home = () => {
                           mb: 2,
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 1
+                          gap: 1,
+                          fontSize: '20px'
                         }}
                       >
                         AI Analysis Score
@@ -1381,8 +1417,8 @@ const Home = () => {
                             imageRatings.get(selectedImage.filename).score >= 7 ? 'success' : 
                             imageRatings.get(selectedImage.filename).score >= 5 ? 'warning' : 'error'
                           }
-                          size="small"
-                          sx={{ ml: 1 }}
+                          size="medium"
+                          sx={{ ml: 1, fontSize: '16px', fontWeight: 600 }}
                         />
                       </Typography>
                       
@@ -1392,10 +1428,11 @@ const Home = () => {
                           color: colors.textDark,
                           lineHeight: 1.6,
                           backgroundColor: '#f8fafc',
-                          padding: '1rem',
-                          borderRadius: '12px',
+                          padding: '1.5rem',
+                          borderRadius: '16px',
                           border: '1px solid #e2e8f0',
-                          fontStyle: 'italic'
+                          fontStyle: 'italic',
+                          fontSize: '16px'
                         }}
                       >
                         "{imageRatings.get(selectedImage.filename).explanation || 'No explanation provided'}"
@@ -1408,7 +1445,8 @@ const Home = () => {
                         sx={{ 
                           color: 'rgba(26, 26, 26, 0.6)',
                           textAlign: 'center',
-                          fontStyle: 'italic'
+                          fontStyle: 'italic',
+                          fontSize: '14px'
                         }}
                       >
                         This analysis is based on your uploaded brand guidelines
