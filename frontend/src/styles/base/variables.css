@@ -1,0 +1,68 @@
+:root {
+  /* Colores principales - degradados originales hermosos */
+  --color-primary: #E91E63;
+  --color-secondary: #FF7043;
+  --color-accent: #F8BBD9;
+  --color-tertiary: #FFE0B2;
+  
+  /* Backgrounds */
+  --color-background: #FFFFFF;
+  --color-surface: #FFFFFF;
+  
+  /* Texto */
+  --color-text: #FFFFFF;
+  --color-text-dark: #1A1A1A;
+  --color-text-secondary: rgba(255,255,255,0.8);
+  
+  /* Estados */
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  
+  /* Gradientes */
+  --gradient-main: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-button: linear-gradient(135deg, var(--color-accent) 0%, var(--color-tertiary) 100%);
+  --gradient-button-hover: linear-gradient(135deg, var(--color-tertiary) 0%, var(--color-accent) 100%);
+  --gradient-progress: linear-gradient(90deg, var(--color-text) 0%, rgba(255,255,255,0.8) 100%);
+  --gradient-results: linear-gradient(135deg, rgba(233, 30, 99, 0.08) 0%, rgba(255, 112, 67, 0.08) 100%);
+  --gradient-winner: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.1);
+  --shadow-primary: 0 8px 25px rgba(233, 30, 99, 0.3);
+  --shadow-primary-hover: 0 12px 35px rgba(233, 30, 99, 0.4);
+  --shadow-button: 0 8px 25px rgba(248, 187, 217, 0.4);
+  --shadow-button-hover: 0 15px 40px rgba(248, 187, 217, 0.5);
+  
+  /* Borders */
+  --border-radius-sm: 12px;
+  --border-radius-md: 20px;
+  --border-radius-lg: 32px;
+  --border-radius-xl: 40px;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Typography */
+  --font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Transitions */
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+  
+  /* Blur */
+  --backdrop-blur: blur(20px);
+  --backdrop-blur-sm: blur(10px);
+}

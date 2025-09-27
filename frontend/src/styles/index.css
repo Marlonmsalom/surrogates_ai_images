@@ -1,0 +1,33 @@
+/* Importar todos los estilos */
+@import './base/variables.css';
+@import './base/global.css';
+@import './components/layout.css';
+@import './components/hero.css';
+@import './components/results.css';
+@import './components/modal.css';
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: var(--spacing-sm);
+  }
+  
+  .glass-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .image-modal-frame {
+    flex-direction: column;
+    max-height: 90vh;
+  }
+  
+  .image-section {
+    flex: none;
+    min-height: 250px;
+  }
+  
+  .info-section {
+    flex: none;
+    padding: var(--spacing-sm);
+  }
+}

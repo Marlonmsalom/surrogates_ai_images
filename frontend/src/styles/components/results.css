@@ -1,0 +1,115 @@
+.results-section {
+  background-color: var(--color-background);
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+  border-top-left-radius: var(--border-radius-xl);
+  border-top-right-radius: var(--border-radius-xl);
+  margin-top: var(--border-radius-xl);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.results-header {
+  background: var(--gradient-results);
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+  border-top-left-radius: var(--border-radius-xl);
+  border-top-right-radius: var(--border-radius-xl);
+}
+
+.image-card {
+  border-radius: var(--border-radius-md) !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background-color: var(--color-surface) !important;
+  position: relative !important;
+  cursor: pointer !important;
+}
+
+.image-card:hover {
+  transform: translateY(-10px) scale(1.02) !important;
+}
+
+.image-card.high-score {
+  border: 3px solid var(--color-success) !important;
+  box-shadow: 0 10px 40px rgba(76, 175, 80, 0.3) !important;
+}
+
+.image-card.high-score:hover {
+  box-shadow: 0 20px 60px rgba(76, 175, 80, 0.4) !important;
+}
+
+.image-card.normal-score {
+  border: none !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.image-card.normal-score:hover {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+.score-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--color-text);
+  border-radius: var(--border-radius-md);
+  padding: 8px 16px;
+  font-weight: var(--font-weight-bold);
+  font-size: 16px;
+  font-family: var(--font-family);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+  backdrop-filter: var(--backdrop-blur-sm);
+}
+
+.score-badge.excellent {
+  background-color: var(--color-success);
+}
+
+.score-badge.good {
+  background-color: var(--color-warning);
+}
+
+.score-badge.poor {
+  background-color: var(--color-error);
+}
+
+.winner-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--gradient-winner);
+  color: #1a1a1a;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  z-index: 2;
+}
+
+.floating-action-button {
+  position: fixed !important;
+  bottom: var(--spacing-lg) !important;
+  right: var(--spacing-lg) !important;
+  background-color: var(--color-primary) !important;
+  color: var(--color-text) !important;
+  width: 60px !important;
+  height: 60px !important;
+  box-shadow: var(--shadow-primary) !important;
+  z-index: 1000 !important;
+  transition: var(--transition-normal) !important;
+}
+
+.floating-action-button:hover {
+  background-color: var(--color-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-hover) !important;
+}

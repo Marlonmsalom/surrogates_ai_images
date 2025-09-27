@@ -47,22 +47,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import api from '../services/api';
 
-// Nueva paleta más suave y profesional inspirada en Material Design 3
+// Paleta original restaurada - Degradado rojo hermoso
 const colors = {
-  primary: '#6366f1',         // Indigo moderno
-  secondary: '#8b5cf6',       // Violeta suave  
-  accent: '#f1f5f9',          // Gris muy claro para superficies
-  tertiary: '#e2e8f0',        // Gris claro para botones
-  background: '#ffffff',      // Blanco puro
-  surface: '#ffffff',         // Blanco para tarjetas
-  text: '#ffffff',            // Blanco para texto sobre gradiente
-  textDark: '#0f172a',        // Azul muy oscuro (mejor que negro puro)
-  textSecondary: 'rgba(255,255,255,0.9)', // Blanco semi-transparente
-  textMuted: '#64748b',       // Gris para texto secundario
-  success: '#10b981',         // Verde moderno
-  warning: '#f59e0b',         // Ámbar
-  error: '#ef4444',           // Rojo suave
-  border: '#e2e8f0',          // Gris para bordes
+  primary: '#E91E63',         // Pink vibrante
+  secondary: '#FF7043',       // Coral/naranja
+  accent: '#F8BBD9',          // Rosa muy suave para botones
+  tertiary: '#FFE0B2',        // Melocotón suave
+  background: '#FFFFFF',      // Blanco puro
+  surface: '#FFFFFF',         // Blanco
+  text: '#FFFFFF',            // Blanco para texto sobre gradiente
+  textDark: '#1A1A1A',        // Negro para texto sobre blanco
+  textSecondary: 'rgba(255,255,255,0.8)', // Blanco semi-transparente
+  success: '#4CAF50',         // Verde éxito
+  warning: '#FF9800',         // Naranja warning
+  error: '#F44336',           // Rojo error
 };
 
 const PageContainer = styled('div')({
@@ -133,49 +131,49 @@ const GlassCard = styled(Box)({
 
 const SearchField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
-    borderRadius: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: '24px',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     border: 'none',
-    fontSize: '16px',
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    fontSize: '18px',
+    fontFamily: '"Inter", "SF Pro Display", sans-serif',
     fontWeight: 500,
-    height: '56px',
+    height: '64px',
     backdropFilter: 'blur(10px)',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
     '& fieldset': {
       border: 'none',
     },
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
     },
     '&.Mui-focused': {
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
     },
   },
 });
 
 const ModernButton = styled(Button)({
-  borderRadius: '16px',
+  borderRadius: '20px',
   textTransform: 'none',
-  fontWeight: 600,
+  fontWeight: 700,
   fontSize: '16px',
-  padding: '14px 28px',
+  padding: '16px 32px',
   background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.tertiary} 100%)`,
   color: colors.textDark,
-  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-  height: '54px',
-  minWidth: '160px',
-  border: `1px solid ${colors.border}`,
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  transition: 'all 0.2s ease',
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  height: '56px',
+  minWidth: '180px',
+  border: 'none',
+  boxShadow: '0 8px 25px rgba(248, 187, 217, 0.4)',
+  transition: 'all 0.3s ease',
   '&:hover': {
     background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent} 100%)`,
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 15px 40px rgba(248, 187, 217, 0.5)',
   },
   '&:disabled': {
     background: 'rgba(255, 255, 255, 0.3)',
@@ -186,61 +184,61 @@ const ModernButton = styled(Button)({
 });
 
 const SecondaryButton = styled(Button)({
-  borderRadius: '16px',
+  borderRadius: '20px',
   textTransform: 'none',
-  fontWeight: 500,
+  fontWeight: 600,
   fontSize: '16px',
-  padding: '14px 28px',
-  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  padding: '16px 32px',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
   color: colors.text,
-  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-  height: '54px',
-  border: '1px solid rgba(255, 255, 255, 0.25)',
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  height: '56px',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
   backdropFilter: 'blur(10px)',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 16px rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 10px 30px rgba(255, 255, 255, 0.2)',
   },
 });
 
 const SettingsButton = styled(IconButton)({
-  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
   color: colors.text,
-  width: '48px',
-  height: '48px',
-  border: '1px solid rgba(255, 255, 255, 0.25)',
+  width: '56px',
+  height: '56px',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
   backdropFilter: 'blur(10px)',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    transform: 'translateY(-1px)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-2px)',
   },
 });
 
 const UploadZone = styled(Box)({
   border: '2px dashed rgba(255, 255, 255, 0.4)',
-  borderRadius: '16px',
-  padding: '2.5rem',
+  borderRadius: '20px',
+  padding: '3rem',
   textAlign: 'center',
   backgroundColor: 'rgba(255, 255, 255, 0.05)',
   backdropFilter: 'blur(10px)',
   cursor: 'pointer',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    border: '2px dashed rgba(255, 255, 255, 0.7)',
+    border: '2px dashed rgba(255, 255, 255, 0.8)',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    transform: 'translateY(-2px)',
+    transform: 'translateY(-5px)',
   },
 });
 
 const StyledLinearProgress = styled(LinearProgress)({
-  height: '6px',
-  borderRadius: '3px',
+  height: '8px',
+  borderRadius: '4px',
   backgroundColor: 'rgba(255, 255, 255, 0.2)',
   '& .MuiLinearProgress-bar': {
-    borderRadius: '3px',
+    borderRadius: '4px',
     background: `linear-gradient(90deg, ${colors.text} 0%, rgba(255,255,255,0.8) 100%)`,
   },
 });
@@ -250,74 +248,74 @@ const ResultsSection = styled(motion.div)({
   minHeight: '100vh',
   position: 'relative',
   zIndex: 2,
-  borderTopLeftRadius: '32px',
-  borderTopRightRadius: '32px',
-  marginTop: '32px',
-  boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
+  borderTopLeftRadius: '40px',
+  borderTopRightRadius: '40px',
+  marginTop: '40px',
+  boxShadow: '0 -20px 60px rgba(0, 0, 0, 0.1)',
   overflow: 'hidden',
 });
 
 const ResultsHeader = styled(Box)({
-  background: `linear-gradient(135deg, ${colors.primary}08 0%, ${colors.secondary}08 100%)`,
-  padding: '2.5rem 0 2rem',
-  borderTopLeftRadius: '32px',
-  borderTopRightRadius: '32px',
+  background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}15 100%)`,
+  padding: '3rem 0 2rem',
+  borderTopLeftRadius: '40px',
+  borderTopRightRadius: '40px',
 });
 
 const ImageCard = styled(Card)(({ score, isAnalyzed }) => ({
-  borderRadius: '16px',
+  borderRadius: '20px',
   overflow: 'hidden',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   border: isAnalyzed && score >= 7 
-    ? `2px solid ${colors.success}` 
-    : `1px solid ${colors.border}`,
+    ? `3px solid ${colors.success}` 
+    : 'none',
   boxShadow: isAnalyzed && score >= 7
-    ? `0 4px 16px rgba(16, 185, 129, 0.2)`
-    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+    ? `0 10px 40px rgba(76, 175, 80, 0.3)`
+    : '0 8px 25px rgba(0, 0, 0, 0.1)',
   backgroundColor: colors.surface,
   position: 'relative',
   cursor: 'pointer',
   '&:hover': {
-    transform: 'translateY(-4px)',
+    transform: 'translateY(-10px) scale(1.02)',
     boxShadow: isAnalyzed && score >= 7
-      ? `0 8px 32px rgba(16, 185, 129, 0.3)`
-      : '0 8px 24px rgba(0, 0, 0, 0.15)',
+      ? `0 20px 60px rgba(76, 175, 80, 0.4)`
+      : '0 15px 50px rgba(0, 0, 0, 0.15)',
   },
 }));
 
 const ScoreBadge = styled(Box)(({ score }) => ({
   position: 'absolute',
-  top: '12px',
-  right: '12px',
+  top: '16px',
+  right: '16px',
   backgroundColor: score >= 7 ? colors.success : score >= 5 ? colors.warning : colors.error,
   color: colors.text,
-  borderRadius: '12px',
-  padding: '4px 8px',
-  fontWeight: 600,
-  fontSize: '14px',
-  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+  borderRadius: '20px',
+  padding: '8px 16px',
+  fontWeight: 700,
+  fontSize: '16px',
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
   display: 'flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: '6px',
   zIndex: 2,
-  backdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(10px)',
 }));
 
 const WinnerBadge = styled(Box)({
   position: 'absolute',
-  top: '12px',
-  left: '12px',
-  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-  color: colors.textDark,
-  borderRadius: '12px',
-  padding: '4px 8px',
-  fontWeight: 600,
-  fontSize: '12px',
+  top: '16px',
+  left: '16px',
+  background: 'linear-gradient(135deg, #FFD700 0%, #FFA000 100%)',
+  color: '#1a1a1a',
+  borderRadius: '25px',
+  padding: '10px 16px',
+  fontWeight: 700,
+  fontSize: '14px',
   display: 'flex',
   alignItems: 'center',
-  gap: '4px',
-  boxShadow: '0 2px 8px rgba(251, 191, 36, 0.3)',
+  gap: '6px',
+  boxShadow: '0 6px 20px rgba(255, 215, 0, 0.4)',
   zIndex: 2,
 });
 
@@ -327,18 +325,18 @@ const FloatingActionButton = styled(IconButton)({
   right: '2rem',
   backgroundColor: colors.primary,
   color: colors.text,
-  width: '56px',
-  height: '56px',
-  boxShadow: '0 4px 16px rgba(99, 102, 241, 0.3)',
+  width: '60px',
+  height: '60px',
+  boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
   zIndex: 1000,
   '&:hover': {
     backgroundColor: colors.secondary,
     transform: 'translateY(-2px)',
-    boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)',
+    boxShadow: '0 12px 35px rgba(233, 30, 99, 0.4)',
   },
 });
 
-// Nuevo componente para el modal mejorado
+// Nuevos componentes para el modal mejorado
 const ImageModalFrame = styled(Box)({
   display: 'flex',
   flexDirection: 'row',
@@ -675,16 +673,10 @@ const Home = () => {
     });
   };
 
-  // Función para obtener el estado del score para compatibilidad
+  // Función para obtener el score para compatibilidad con componentes existentes
   const getScoreFromRating = (filename) => {
     const rating = imageRatings.get(filename);
     return rating ? rating.score : undefined;
-  };
-
-  const getScoreIcon = (score) => {
-    if (score >= 8) return <StarIcon sx={{ fontSize: '16px' }} />;
-    if (score >= 6) return <TrendingUpIcon sx={{ fontSize: '16px' }} />;
-    return null;
   };
 
   return (
@@ -792,9 +784,9 @@ const Home = () => {
                       justifyContent="space-between"
                       p={2}
                       sx={{
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        backgroundColor: 'rgba(233, 30, 99, 0.1)',
                         borderRadius: '12px',
-                        border: '1px solid rgba(99, 102, 241, 0.2)'
+                        border: '1px solid rgba(233, 30, 99, 0.2)'
                       }}
                     >
                       <Box display="flex" alignItems="center" gap={2}>
@@ -885,7 +877,7 @@ const Home = () => {
                   fontSize: { xs: '3rem', md: '5rem', lg: '6rem' },
                   fontWeight: 800,
                   color: colors.text,
-                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
                   mb: 2,
                   lineHeight: 1.1,
                 }}
@@ -896,7 +888,7 @@ const Home = () => {
                 variant="h4" 
                 sx={{
                   color: colors.textSecondary,
-                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
                   fontWeight: 400,
                   fontSize: { xs: '1.2rem', md: '1.8rem' },
                   maxWidth: '600px',
@@ -938,7 +930,7 @@ const Home = () => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <SearchIcon sx={{ color: colors.primary, fontSize: '20px' }} />
+                              <SearchIcon sx={{ color: colors.primary, fontSize: '24px' }} />
                             </InputAdornment>
                           ),
                         }}
@@ -947,7 +939,7 @@ const Home = () => {
                     </Box>
 
                     {error && (
-                      <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>
+                      <Alert severity="error" sx={{ mb: 3, borderRadius: '16px' }}>
                         {error}
                       </Alert>
                     )}
@@ -995,12 +987,12 @@ const Home = () => {
                             mb={2}
                             sx={{
                               backgroundColor: guideline.isDefault 
-                                ? 'rgba(16, 185, 129, 0.2)' 
+                                ? 'rgba(76, 175, 80, 0.2)' 
                                 : 'rgba(255, 255, 255, 0.2)',
-                              borderRadius: '12px',
+                              borderRadius: '16px',
                               backdropFilter: 'blur(10px)',
                               border: guideline.isDefault 
-                                ? '1px solid rgba(16, 185, 129, 0.3)' 
+                                ? '1px solid rgba(76, 175, 80, 0.3)' 
                                 : '1px solid rgba(255, 255, 255, 0.2)'
                             }}
                           >
@@ -1043,7 +1035,7 @@ const Home = () => {
                         />
                         <label htmlFor="guidelines-upload">
                           <UploadZone>
-                            <CloudUploadIcon sx={{ fontSize: '3rem', color: colors.textSecondary, mb: 2 }} />
+                            <CloudUploadIcon sx={{ fontSize: '4rem', color: colors.textSecondary, mb: 2 }} />
                             <Typography variant="h6" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
                               Drop your PDF here or click to browse
                             </Typography>
@@ -1070,13 +1062,13 @@ const Home = () => {
                             variant="outlined"
                             startIcon={<CloudUploadIcon />}
                             sx={{
-                              borderRadius: '12px',
-                              borderColor: 'rgba(255, 255, 255, 0.4)',
+                              borderRadius: '16px',
+                              borderColor: 'rgba(255, 255, 255, 0.5)',
                               color: colors.text,
                               mb: 3,
                               '&:hover': {
                                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: 'rgba(255, 255, 255, 0.7)'
+                                borderColor: 'rgba(255, 255, 255, 0.8)'
                               }
                             }}
                           >
@@ -1087,7 +1079,7 @@ const Home = () => {
                     )}
 
                     {error && (
-                      <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>
+                      <Alert severity="error" sx={{ mb: 3, borderRadius: '16px' }}>
                         {error}
                       </Alert>
                     )}
@@ -1134,7 +1126,7 @@ const Home = () => {
                         variant="body1" 
                         sx={{ 
                           color: colors.textSecondary,
-                          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                          fontFamily: '"Inter", "SF Pro Display", sans-serif',
                           fontWeight: 600,
                           mb: 2,
                           textAlign: 'center'
@@ -1145,6 +1137,7 @@ const Home = () => {
                       <StyledLinearProgress 
                         variant="determinate" 
                         value={progress}
+                        sx={{ height: '8px', borderRadius: '4px' }}
                       />
                       <Typography 
                         variant="body2" 
@@ -1186,7 +1179,7 @@ const Home = () => {
                     sx={{ 
                       color: colors.textDark, 
                       fontWeight: 800,
-                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                      fontFamily: '"Inter", "SF Pro Display", sans-serif',
                     }}
                   >
                     Analysis Results
@@ -1219,10 +1212,10 @@ const Home = () => {
                         gap: 2
                       }}
                     >
-                      <EmojiEventsIcon sx={{ color: colors.warning, fontSize: '2rem' }} />
+                      <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
                       Top Performers (Score 7+)
                     </Typography>
-                    <Typography variant="body1" sx={{ color: colors.textMuted }}>
+                    <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)' }}>
                       {getTopImages().length} images perfectly match your brand guidelines
                     </Typography>
                   </Box>
@@ -1240,12 +1233,14 @@ const Home = () => {
                   return (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.8, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ 
-                          duration: 0.4,
-                          type: "ease",
-                          delay: index * 0.05
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 80,
+                          damping: 15,
+                          delay: index * 0.1
                         }}
                       >
                         <ImageCard 
@@ -1255,21 +1250,21 @@ const Home = () => {
                         >
                           <CardMedia
                             component="img"
-                            height="220"
+                            height="260"
                             image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
                             alt={image.description}
                           />
                           
                           {isWinner && (
                             <WinnerBadge>
-                              <EmojiEventsIcon sx={{ fontSize: '14px' }} />
+                              <EmojiEventsIcon sx={{ fontSize: '16px' }} />
                               Winner
                             </WinnerBadge>
                           )}
                           
                           {isAnalyzed && (
                             <ScoreBadge score={score}>
-                              {getScoreIcon(score)}
+                              {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
                               {score}/10
                             </ScoreBadge>
                           )}
@@ -1346,7 +1341,7 @@ const Home = () => {
                       fontWeight: 700, 
                       color: colors.textDark,
                       mb: 1,
-                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif'
+                      fontFamily: '"Inter", "SF Pro Display", sans-serif'
                     }}
                   >
                     Image Details
@@ -1354,7 +1349,7 @@ const Home = () => {
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      color: colors.textMuted,
+                      color: 'rgba(26, 26, 26, 0.7)',
                       mb: 2,
                       lineHeight: 1.5
                     }}
@@ -1396,10 +1391,10 @@ const Home = () => {
                         sx={{ 
                           color: colors.textDark,
                           lineHeight: 1.6,
-                          backgroundColor: colors.accent,
+                          backgroundColor: '#f8fafc',
                           padding: '1rem',
                           borderRadius: '12px',
-                          border: `1px solid ${colors.border}`,
+                          border: '1px solid #e2e8f0',
                           fontStyle: 'italic'
                         }}
                       >
@@ -1411,7 +1406,7 @@ const Home = () => {
                       <Typography 
                         variant="body2" 
                         sx={{ 
-                          color: colors.textMuted,
+                          color: 'rgba(26, 26, 26, 0.6)',
                           textAlign: 'center',
                           fontStyle: 'italic'
                         }}

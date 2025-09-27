@@ -3,97 +3,68 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import './styles/index.css';
 
 const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#007AFF',
-      light: '#5AC8FA',
-      dark: '#0056CC',
+      main: '#E91E63',
+      light: '#F8BBD9',
+      dark: '#AD1457',
     },
     secondary: {
-      main: '#5856D6',
-      light: '#AF52DE',
-      dark: '#3C3C43',
+      main: '#FF7043',
+      light: '#FFE0B2',
+      dark: '#BF360C',
     },
     background: {
-      default: '#F2F2F7',
+      default: '#FFFFFF',
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#1C1C1E',
-      secondary: '#8E8E93',
+      primary: '#1A1A1A',
+      secondary: 'rgba(26, 26, 26, 0.7)',
+    },
+    success: {
+      main: '#4CAF50',
+    },
+    warning: {
+      main: '#FF9800',
+    },
+    error: {
+      main: '#F44336',
     },
   },
   typography: {
     fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
     h1: {
-      fontWeight: 700,
-      fontSize: '2.5rem',
+      fontWeight: 800,
+      fontSize: '6rem',
       letterSpacing: '-0.02em',
-    },
-    h2: {
-      fontWeight: 600,
-      fontSize: '2rem',
-      letterSpacing: '-0.01em',
+      '@media (max-width:768px)': {
+        fontSize: '3rem',
+      },
     },
     h3: {
-      fontWeight: 600,
-      fontSize: '1.5rem',
-      letterSpacing: '-0.01em',
+      fontWeight: 800,
+      fontSize: '2.5rem',
     },
     h4: {
-      fontWeight: 600,
+      fontWeight: 700,
+      fontSize: '2rem',
+    },
+    h5: {
+      fontWeight: 700,
+      fontSize: '1.5rem',
+    },
+    h6: {
+      fontWeight: 700,
       fontSize: '1.25rem',
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.5,
-    },
-    body2: {
-      fontSize: '0.875rem',
-      lineHeight: 1.43,
     },
   },
   shape: {
     borderRadius: 12,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          textTransform: 'none',
-          fontWeight: 600,
-          fontSize: '1rem',
-          padding: '12px 24px',
-          boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          },
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          border: '1px solid rgba(0,0,0,0.05)',
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 12,
-            backgroundColor: '#FFFFFF',
-          },
-        },
-      },
-    },
   },
 });
 

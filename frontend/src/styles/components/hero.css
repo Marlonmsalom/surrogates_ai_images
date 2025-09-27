@@ -1,0 +1,128 @@
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: var(--spacing-lg);
+  z-index: 1;
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.search-field .MuiOutlinedInput-root {
+  border-radius: 24px !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
+  font-size: 18px !important;
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-medium) !important;
+  height: 64px !important;
+  backdrop-filter: var(--backdrop-blur-sm) !important;
+  transition: var(--transition-normal) !important;
+}
+
+.search-field .MuiOutlinedInput-root fieldset {
+  border: none !important;
+}
+
+.search-field .MuiOutlinedInput-root:hover {
+  background-color: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.search-field .MuiOutlinedInput-root.Mui-focused {
+  background-color: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modern-button {
+  border-radius: var(--border-radius-md) !important;
+  text-transform: none !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-size: 16px !important;
+  padding: 16px 32px !important;
+  background: var(--gradient-button) !important;
+  color: var(--color-text-dark) !important;
+  font-family: var(--font-family) !important;
+  height: 56px !important;
+  min-width: 180px !important;
+  border: none !important;
+  box-shadow: var(--shadow-button) !important;
+  transition: var(--transition-normal) !important;
+}
+
+.modern-button:hover {
+  background: var(--gradient-button-hover) !important;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-button-hover) !important;
+}
+
+.modern-button:disabled {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.secondary-button {
+  border-radius: var(--border-radius-md) !important;
+  text-transform: none !important;
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: 16px !important;
+  padding: 16px 32px !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text) !important;
+  font-family: var(--font-family) !important;
+  height: 56px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: var(--backdrop-blur-sm) !important;
+  transition: var(--transition-normal) !important;
+}
+
+.secondary-button:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2) !important;
+}
+
+.upload-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xl);
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: var(--backdrop-blur-sm);
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.upload-zone:hover {
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+}
+
+.styled-progress {
+  height: 8px !important;
+  border-radius: 4px !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.styled-progress .MuiLinearProgress-bar {
+  border-radius: 4px !important;
+  background: var(--gradient-progress) !important;
+}
