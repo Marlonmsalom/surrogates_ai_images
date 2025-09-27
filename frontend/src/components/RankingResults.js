@@ -1,28 +1,23 @@
 import React, { useState } from 'react';
 import {
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
   Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
   Chip,
-  LinearProgress,
+  Grid,
   Tabs,
-  Tab,
-  Button,
-  IconButton,
-  Tooltip
+  Tab
 } from '@mui/material';
 import { motion } from 'framer-motion';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
-import TrophyIcon from '@mui/icons-material/EmojiEvents';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import DownloadIcon from '@mui/icons-material/Download';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
-const RankingResults = ({ ratings }) => {
+const RankingResults = ({ ratings, jobId }) => {
   const [selectedTab, setSelectedTab] = useState(0);
-  
+
   if (!ratings || ratings.length === 0) {
     return (
       <Box textAlign="center" py={4}>
@@ -41,10 +36,13 @@ const RankingResults = ({ ratings }) => {
   };
 
   const getScoreIcon = (score, index) => {
-    if (index === 0) return <TrophyIcon sx={{ color: 'gold', fontSize: 20 }} />;
-    if (index === 1) return <TrophyIcon sx={{ color: 'silver', fontSize: 18 }} />;
-    if (index === 2) return <TrophyIcon sx={{ color: '#cd7f32', fontSize: 16 }} />;
-    return <StarIcon sx={{ color: 'primary.main', fontSize: 16 }} />;
+    if (index < 3) {
+      const colors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+      return <EmojiEventsIcon sx={{ color: colors[index], fontSize: 16 }} />;
+    }
+    if (score >= 8) return <StarIcon sx={{ color: 'success.main', fontSize: 16 }} />;
+    if (score >= 6) return <TrendingUpIcon sx={{ color: 'warning.main', fontSize: 16 }} />;
+    return null;
   };
 
   const filterRatings = (filter) => {
@@ -116,13 +114,14 @@ const RankingResults = ({ ratings }) => {
                   <CardMedia
                     component="img"
                     height="240"
-                    image={`/api/image/${rating.filename}`}
+                    image={`http://localhost:8000/api/image/${encodeURIComponent(jobId)}/${encodeURIComponent(rating.filename)}`}
                     alt={rating.filename}
                     sx={{
                       objectFit: 'cover',
                       backgroundColor: 'grey.100',
                     }}
                     onError={(e) => {
+                      console.error('Image failed to load:', rating.filename, 'jobId:', jobId);
                       e.target.src = `data:image/svg+xml,<svg width="300" height="240" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="%23f5f5f5"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">${rating.filename}</text></svg>`;
                     }}
                   />
@@ -162,61 +161,48 @@ const RankingResults = ({ ratings }) => {
                       py: 0.5,
                     }}
                   >
-                    <Typography variant="h6" fontWeight={700}>
+                    <Typography variant="body2" fontWeight={600}>
                       {rating.score}/10
                     </Typography>
                   </Box>
 
-                  {/* Action Buttons */}
+                  {/* Status Chip */}
                   <Box
                     sx={{
                       position: 'absolute',
-                      bottom: 8,
-                      right: 8,
-                      display: 'flex',
-                      gap: 1,
+                      bottom: 12,
+                      left: 12,
                     }}
                   >
-                    <Tooltip title="View Full Size">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: 'rgba(0,0,0,0.7)',
-                          color: 'white',
-                          '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' },
-                        }}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Box>
-                
-                <CardContent sx={{ pb: 2 }}>
-                  <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                    <Typography variant="h6" component="div" fontWeight={600}>
-                      {rating.score}/10
-                    </Typography>
                     <Chip
-                      label={rating.status || 'Analyzed'}
+                      label={rating.status || 'unknown'}
                       size="small"
                       color={getScoreColor(rating.score)}
-                      variant="outlined"
-                    />
-                  </Box>
-                  
-                  <Box mb={2}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={rating.score * 10}
-                      color={getScoreColor(rating.score)}
                       sx={{
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        color: `${getScoreColor(rating.score)}.main`,
+                        fontWeight: 600,
+                        textTransform: 'capitalize',
                       }}
                     />
                   </Box>
+                </Box>
+
+                <CardContent sx={{ p: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      mb: 1,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {rating.filename}
+                  </Typography>
                   
                   <Typography
                     variant="body2"
@@ -227,43 +213,16 @@ const RankingResults = ({ ratings }) => {
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
-                      minHeight: '3.6em',
                     }}
                   >
-                    {rating.explanation || 'Analysis complete'}
+                    {rating.explanation || 'No explanation provided'}
                   </Typography>
-                  
-                  <Box mt={2}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {rating.filename}
-                    </Typography>
-                  </Box>
                 </CardContent>
               </Card>
             </motion.div>
           </Grid>
         ))}
       </Grid>
-
-      {displayRatings.length === 0 && (
-        <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No images in this category
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try selecting a different filter
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 };

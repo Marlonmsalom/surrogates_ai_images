@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
@@ -25,13 +25,38 @@ class AnalyzeImagesRequest(BaseModel):
 
 active_jobs = {}
 
+@router.post("/upload-guideline")
+async def upload_guideline(file: UploadFile = File(...)):
+    """Upload guideline file"""
+    try:
+        # Get project root path
+        current_file = Path(__file__)
+        project_root = current_file.parent.parent.parent.parent
+        uploads_dir = project_root / "data" / "uploads"
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save file
+        file_path = uploads_dir / file.filename
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        return {
+            "success": True,
+            "file_path": f"data/uploads/{file.filename}",
+            "filename": file.filename
+        }
+        
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
 @router.get("/image/{job_id}/{filename}")
 async def get_image(job_id: str, filename: str):
     """Serve images from job directory"""
     try:
         logger.info(f"Serving image - job_id: {job_id}, filename: {filename}")
         
-        # Get absolute path from project root
         current_file = Path(__file__)
         project_root = current_file.parent.parent.parent.parent
         file_path = project_root / "data" / "images" / job_id / filename

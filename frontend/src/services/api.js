@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api' 
-  : 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,38 +8,20 @@ const api = axios.create({
 });
 
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   (error) => {
     console.error('API Error:', error.response?.data || error.message);
-    throw error;
+    return Promise.reject(error);
   }
 );
 
 export default {
-  uploadGuideline: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    return api.post('/upload-guideline', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
-
-  downloadImages: (data) => {
-    return api.post('/download-images', data);
-  },
-
-  analyzeImages: (data) => {
-    return api.post('/analyze-images', data);
-  },
-
-  getJobStatus: (jobId) => {
-    return api.get(`/job-status/${jobId}`);
-  },
-
-  healthCheck: () => {
-    return api.get('/health');
-  },
+  downloadImages: (data) => api.post('/download-images', data).then(res => res.data),
+  analyzeImages: (data) => api.post('/analyze-images', data).then(res => res.data),
+  getJobStatus: (jobId) => api.get(`/job-status/${jobId}`).then(res => res.data),
+  uploadGuideline: (formData) => api.post('/upload-guideline', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }).then(res => res.data),
 };

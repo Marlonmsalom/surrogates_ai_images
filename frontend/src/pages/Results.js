@@ -115,39 +115,46 @@ const Results = () => {
         <CardContent sx={{ p: 4 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
             <Box display="flex" alignItems="center" gap={2}>
-              <TrophyIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-              <Box>
-                <Typography variant="h4" gutterBottom>
-                  Analysis Results
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Brand guidelines compliance analysis
-                </Typography>
-              </Box>
+              <TrophyIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+              <Typography variant="h4" component="h1" fontWeight={600}>
+                Analysis Results
+              </Typography>
             </Box>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={() => navigate('/')}
-            >
-              New Analysis
-            </Button>
+            
+            <Tooltip title="New Analysis">
+              <IconButton
+                onClick={() => navigate('/')}
+                sx={{
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+              >
+                <HomeIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
+
+          <Typography variant="body1" color="text.secondary" paragraph>
+            Brand guidelines compliance analysis
+          </Typography>
 
           <Grid container spacing={3} mb={4}>
             <Grid item xs={12} md={4}>
               <Card sx={{ p: 3, textAlign: 'center', height: '100%' }}>
                 <StarIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h3" color="primary.main" gutterBottom>
-                  {avgScore.toFixed(1)}
+                  {isNaN(avgScore) ? 'NaN' : avgScore.toFixed(1)}
                 </Typography>
                 <Typography variant="h6" gutterBottom>
                   Average Score
                 </Typography>
                 <Chip
-                  label={getScoreLabel(avgScore)}
-                  color={getScoreColor(avgScore)}
-                  size="small"
+                  label={isNaN(avgScore) ? 'Poor' : getScoreLabel(avgScore)}
+                  color={isNaN(avgScore) ? 'error' : getScoreColor(avgScore)}
+                  sx={{ fontWeight: 600 }}
                 />
               </Card>
             </Grid>
@@ -183,7 +190,7 @@ const Results = () => {
             </Grid>
           </Grid>
 
-          <RankingResults ratings={results.ratings} />
+          <RankingResults ratings={results.ratings} jobId={jobId} />
 
           {results.usage && (
             <Box mt={4} p={2} bgcolor="background.default" borderRadius={2}>
