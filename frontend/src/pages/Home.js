@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -10,6 +10,8 @@ import {
   IconButton,
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogActions,
   Grid,
   CardMedia,
   Alert,
@@ -19,8 +21,13 @@ import {
   Zoom,
   AppBar,
   Toolbar,
-  Menu,
-  MenuItem
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+  Divider
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,6 +42,8 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LanguageIcon from '@mui/icons-material/Language';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import api from '../services/api';
 
 // Paleta moderna inspirada en Jeton
@@ -104,6 +113,7 @@ const HeroSection = styled(Box)({
   alignItems: 'center',
   position: 'relative',
   padding: '2rem',
+  zIndex: 1,
 });
 
 const GlassCard = styled(Box)({
@@ -232,12 +242,24 @@ const StyledLinearProgress = styled(LinearProgress)({
   },
 });
 
-const ResultsSection = styled(Box)({
+// Nueva sección de resultados con transición tipo Jeton
+const ResultsSection = styled(motion.div)({
   backgroundColor: colors.background,
   minHeight: '100vh',
-  paddingTop: '2rem',
-  paddingBottom: '4rem',
-  marginTop: '0',
+  position: 'relative',
+  zIndex: 2,
+  borderTopLeftRadius: '40px',
+  borderTopRightRadius: '40px',
+  marginTop: '40px',
+  boxShadow: '0 -20px 60px rgba(0, 0, 0, 0.1)',
+  overflow: 'hidden',
+});
+
+const ResultsHeader = styled(Box)({
+  background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}15 100%)`,
+  padding: '3rem 0 2rem',
+  borderTopLeftRadius: '40px',
+  borderTopRightRadius: '40px',
 });
 
 const ImageCard = styled(Card)(({ score, isAnalyzed }) => ({
@@ -316,7 +338,7 @@ const FloatingActionButton = styled(IconButton)({
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [guidelines, setGuidelines] = useState([]);
-  const [currentStep, setCurrentStep] = useState('search'); // 'search', 'guidelines', 'analysis', 'results'
+  const [currentStep, setCurrentStep] = useState('search');
   const [isProcessing, setIsProcessing] = useState(false);
   const [images, setImages] = useState([]);
   const [analyzedImages, setAnalyzedImages] = useState(new Map());
@@ -325,19 +347,53 @@ const Home = () => {
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
-  const [settingsAnchor, setSettingsAnchor] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [wsConnection, setWsConnection] = useState(null);
+  
+  // Settings state - DEFAULT A UNSPLASH
+  const [settings, setSettings] = useState({
+    provider: 'unsplash',
+    imageCount: 20,
+    defaultGuidelines: null,
+    useDefaultGuidelines: false,
+  });
   
   const heroRef = useRef(null);
   const resultsRef = useRef(null);
 
-  const handleNext = () => {
-    if (!searchQuery.trim()) {
-      setError('Please enter a search query');
-      return;
+  // Load settings and default guidelines on mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('surrogates-settings');
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings);
+      setSettings(parsed);
+      
+      // Load default guidelines if enabled
+      if (parsed.useDefaultGuidelines && parsed.defaultGuidelines) {
+        setGuidelines([{
+          id: 'default',
+          name: parsed.defaultGuidelines.name,
+          file: null,
+          isDefault: true,
+          path: parsed.defaultGuidelines.path
+        }]);
+      }
     }
-    setError('');
-    setCurrentStep('guidelines');
+  }, []);
+
+  // Cleanup WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsConnection) {
+        wsConnection.close();
+      }
+    };
+  }, [wsConnection]);
+
+  const saveSettings = () => {
+    localStorage.setItem('surrogates-settings', JSON.stringify(settings));
+    setSettingsOpen(false);
   };
 
   const handleFileUpload = (event) => {
@@ -346,9 +402,55 @@ const Home = () => {
       id: Date.now() + Math.random(),
       name: file.name,
       file: file,
+      isDefault: false
     }));
-    setGuidelines(newGuidelines);
+    
+    // Replace non-default guidelines
+    const defaultGuidelines = guidelines.filter(g => g.isDefault);
+    setGuidelines([...defaultGuidelines, ...newGuidelines]);
     setError('');
+  };
+
+  const handleDefaultGuidelinesUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploadResponse = await api.uploadGuideline(formData);
+      
+      setSettings(prev => ({
+        ...prev,
+        defaultGuidelines: {
+          name: file.name,
+          path: uploadResponse.file_path
+        },
+        useDefaultGuidelines: true
+      }));
+    } catch (error) {
+      console.error('Error uploading default guidelines:', error);
+    }
+  };
+
+  const removeDefaultGuidelines = () => {
+    setSettings(prev => ({
+      ...prev,
+      defaultGuidelines: null,
+      useDefaultGuidelines: false
+    }));
+    
+    // Remove from current guidelines if present
+    setGuidelines(prev => prev.filter(g => !g.isDefault));
+  };
+
+  const handleNext = () => {
+    if (!searchQuery.trim()) {
+      setError('Please enter a search query');
+      return;
+    }
+    setError('');
+    setCurrentStep('guidelines');
   };
 
   const removeGuideline = (id) => {
@@ -367,38 +469,61 @@ const Home = () => {
     setImages([]);
     setAnalyzedImages(new Map());
     setProgress(0);
-    setProgressMessage('Starting analysis...');
+    setProgressMessage('Preparing analysis...');
     
     try {
-      // Upload guidelines
-      setProgressMessage('Uploading guidelines...');
-      setProgress(10);
-      const formData = new FormData();
-      formData.append('file', guidelines[0].file);
-      const uploadResponse = await api.uploadGuideline(formData);
-      const guidelinePath = uploadResponse.file_path;
+      let guidelinePath;
+      
+      // Use default guidelines if available, otherwise upload new ones
+      const defaultGuideline = guidelines.find(g => g.isDefault);
+      if (defaultGuideline) {
+        guidelinePath = defaultGuideline.path;
+        setProgress(20);
+      } else {
+        setProgressMessage('Uploading guidelines...');
+        setProgress(10);
+        const formData = new FormData();
+        formData.append('file', guidelines[0].file);
+        const uploadResponse = await api.uploadGuideline(formData);
+        guidelinePath = uploadResponse.file_path;
+        setProgress(20);
+      }
 
-      // Download images
-      setProgressMessage('Downloading images...');
-      setProgress(20);
+      setProgressMessage('Starting image download...');
+      
+      // PRIMERO: Conectar WebSocket
       const response = await api.downloadImages({
         query: searchQuery,
-        provider: 'unsplash',
-        limit: 20
+        provider: settings.provider,
+        limit: settings.imageCount
       });
 
       setCurrentJobId(response.job_id);
-
+      
+      // INMEDIATAMENTE: Conectar WebSocket
       const ws = new WebSocket(`ws://localhost:8000/ws/${response.job_id}`);
+      setWsConnection(ws);
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected successfully');
+        setProgressMessage('Connected! Downloading images...');
+      };
       
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log('WebSocket message:', data);
         
         if (data.status === 'downloading') {
           setProgress(20 + (data.progress * 0.5));
           setProgressMessage(`Downloading images... ${data.progress}%`);
         }
         else if (data.status === 'completed' && data.result && data.result.images) {
+          if (data.result.images.length === 0) {
+            setError('No images found. Try a different search term or check API keys.');
+            setIsProcessing(false);
+            return;
+          }
+          
           setImages(data.result.images);
           setProgress(70);
           setProgressMessage('Images downloaded! Starting AI analysis...');
@@ -432,20 +557,45 @@ const Home = () => {
           setIsProcessing(false);
           setShowResults(true);
           
-          // Auto scroll to results
+          // Auto scroll to results with smooth transition
           setTimeout(() => {
             resultsRef.current?.scrollIntoView({ 
               behavior: 'smooth',
               block: 'start'
             });
-          }, 500);
+          }, 800);
+          
+          // Close WebSocket
+          ws.close();
+          setWsConnection(null);
         }
+        else if (data.status === 'error') {
+          setError(data.message || 'An error occurred during processing');
+          setIsProcessing(false);
+          ws.close();
+          setWsConnection(null);
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setError('Connection error. Please try again.');
+        setIsProcessing(false);
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket closed');
+        setWsConnection(null);
       };
 
     } catch (error) {
       console.error('Error:', error);
       setError('Analysis failed. Please try again.');
       setIsProcessing(false);
+      if (wsConnection) {
+        wsConnection.close();
+        setWsConnection(null);
+      }
     }
   };
 
@@ -464,12 +614,22 @@ const Home = () => {
   const resetFlow = () => {
     setCurrentStep('search');
     setSearchQuery('');
-    setGuidelines([]);
+    
+    // Keep default guidelines but remove uploaded ones
+    const defaultGuidelines = guidelines.filter(g => g.isDefault);
+    setGuidelines(defaultGuidelines);
+    
     setImages([]);
     setAnalyzedImages(new Map());
     setError('');
     setIsProcessing(false);
     setShowResults(false);
+    
+    // Close any existing WebSocket
+    if (wsConnection) {
+      wsConnection.close();
+      setWsConnection(null);
+    }
     
     // Scroll to top
     heroRef.current?.scrollIntoView({ 
@@ -506,7 +666,7 @@ const Home = () => {
             <HeaderButton>Log in</HeaderButton>
             <SignUpButton>Sign up</SignUpButton>
             <SettingsButton 
-              onClick={(e) => setSettingsAnchor(e.currentTarget)}
+              onClick={() => setSettingsOpen(true)}
               sx={{ ml: 1 }}
             >
               <SettingsIcon />
@@ -515,22 +675,168 @@ const Home = () => {
         </Toolbar>
       </TopBar>
 
-      {/* Settings Menu */}
-      <Menu
-        anchorEl={settingsAnchor}
-        open={Boolean(settingsAnchor)}
-        onClose={() => setSettingsAnchor(null)}
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        maxWidth="sm"
+        fullWidth
         PaperProps={{
           sx: {
-            borderRadius: '12px',
-            mt: 1,
+            borderRadius: '20px',
+            p: 2
           }
         }}
       >
-        <MenuItem onClick={() => setSettingsAnchor(null)}>Image Provider</MenuItem>
-        <MenuItem onClick={() => setSettingsAnchor(null)}>Image Count</MenuItem>
-        <MenuItem onClick={() => setSettingsAnchor(null)}>Language</MenuItem>
-      </Menu>
+        <DialogTitle sx={{ 
+          fontSize: '1.5rem', 
+          fontWeight: 700,
+          color: colors.textDark,
+          pb: 1
+        }}>
+          Settings
+        </DialogTitle>
+        
+        <DialogContent sx={{ py: 2 }}>
+          <Box display="flex" flexDirection="column" gap={3}>
+            {/* Image Provider */}
+            <FormControl fullWidth>
+              <InputLabel>Image Provider</InputLabel>
+              <Select
+                value={settings.provider}
+                onChange={(e) => setSettings(prev => ({ ...prev, provider: e.target.value }))}
+                label="Image Provider"
+                sx={{ borderRadius: '12px' }}
+              >
+                <MenuItem value="unsplash">Unsplash (Recommended)</MenuItem>
+                <MenuItem value="pexels">Pexels</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Image Count */}
+            <TextField
+              fullWidth
+              label="Number of images per search"
+              type="number"
+              value={settings.imageCount}
+              onChange={(e) => setSettings(prev => ({ ...prev, imageCount: parseInt(e.target.value) }))}
+              inputProps={{ min: 5, max: 50 }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                }
+              }}
+            />
+
+            <Divider />
+
+            {/* Default Guidelines */}
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Default Guidelines
+              </Typography>
+              
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.useDefaultGuidelines}
+                    onChange={(e) => setSettings(prev => ({ 
+                      ...prev, 
+                      useDefaultGuidelines: e.target.checked 
+                    }))}
+                    color="primary"
+                  />
+                }
+                label="Use default guidelines for all searches"
+                sx={{ mb: 2 }}
+              />
+
+              {settings.useDefaultGuidelines && (
+                <Box>
+                  {settings.defaultGuidelines ? (
+                    <Box 
+                      display="flex" 
+                      alignItems="center" 
+                      justifyContent="space-between"
+                      p={2}
+                      sx={{
+                        backgroundColor: 'rgba(233, 30, 99, 0.1)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(233, 30, 99, 0.2)'
+                      }}
+                    >
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <CheckCircleIcon sx={{ color: colors.primary }} />
+                        <Typography sx={{ fontWeight: 600 }}>
+                          {settings.defaultGuidelines.name}
+                        </Typography>
+                      </Box>
+                      <IconButton 
+                        onClick={removeDefaultGuidelines}
+                        size="small"
+                        sx={{ color: colors.error }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Box>
+                      <input
+                        type="file"
+                        accept=".pdf,.ppt,.pptx"
+                        onChange={handleDefaultGuidelinesUpload}
+                        style={{ display: 'none' }}
+                        id="default-guidelines-upload"
+                      />
+                      <label htmlFor="default-guidelines-upload">
+                        <Button
+                          component="span"
+                          variant="outlined"
+                          startIcon={<CloudUploadIcon />}
+                          sx={{
+                            borderRadius: '12px',
+                            borderColor: colors.primary,
+                            color: colors.primary,
+                            '&:hover': {
+                              backgroundColor: colors.primary,
+                              color: 'white'
+                            }
+                          }}
+                        >
+                          Upload Default Guidelines
+                        </Button>
+                      </label>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button 
+            onClick={() => setSettingsOpen(false)}
+            sx={{ borderRadius: '12px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={saveSettings}
+            variant="contained"
+            startIcon={<SaveIcon />}
+            sx={{
+              borderRadius: '12px',
+              backgroundColor: colors.primary,
+              '&:hover': {
+                backgroundColor: colors.secondary
+              }
+            }}
+          >
+            Save Settings
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Hero Section */}
       <HeroSection ref={heroRef}>
@@ -642,33 +948,11 @@ const Home = () => {
                         textAlign: 'center'
                       }}
                     >
-                      Upload Your Brand Guidelines
+                      {guidelines.length > 0 ? 'Your Guidelines' : 'Upload Your Brand Guidelines'}
                     </Typography>
 
-                    {guidelines.length === 0 ? (
-                      <input
-                        type="file"
-                        accept=".pdf,.ppt,.pptx"
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                        id="guidelines-upload"
-                      />
-                    ) : null}
-
-                    {guidelines.length === 0 ? (
-                      <label htmlFor="guidelines-upload">
-                        <UploadZone>
-                          <CloudUploadIcon sx={{ fontSize: '4rem', color: colors.textSecondary, mb: 2 }} />
-                          <Typography variant="h6" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
-                            Drop your PDF here or click to browse
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-                            Supports PDF, PPT, PPTX files
-                          </Typography>
-                        </UploadZone>
-                      </label>
-                    ) : (
-                      <Box>
+                    {guidelines.length > 0 && (
+                      <Box mb={3}>
                         {guidelines.map((guideline) => (
                           <Box 
                             key={guideline.id}
@@ -678,26 +962,96 @@ const Home = () => {
                             p={2}
                             mb={2}
                             sx={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                              backgroundColor: guideline.isDefault 
+                                ? 'rgba(76, 175, 80, 0.2)' 
+                                : 'rgba(255, 255, 255, 0.2)',
                               borderRadius: '16px',
-                              backdropFilter: 'blur(10px)'
+                              backdropFilter: 'blur(10px)',
+                              border: guideline.isDefault 
+                                ? '1px solid rgba(76, 175, 80, 0.3)' 
+                                : '1px solid rgba(255, 255, 255, 0.2)'
                             }}
                           >
                             <Box display="flex" alignItems="center" gap={2}>
-                              <CheckCircleIcon sx={{ color: colors.success }} />
-                              <Typography sx={{ color: colors.text, fontWeight: 600 }}>
-                                {guideline.name}
-                              </Typography>
+                              <CheckCircleIcon 
+                                sx={{ color: guideline.isDefault ? colors.success : colors.text }} 
+                              />
+                              <Box>
+                                <Typography sx={{ color: colors.text, fontWeight: 600 }}>
+                                  {guideline.name}
+                                </Typography>
+                                {guideline.isDefault && (
+                                  <Typography variant="caption" sx={{ color: colors.textSecondary }}>
+                                    Default Guidelines
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                            <IconButton 
-                              onClick={() => removeGuideline(guideline.id)}
-                              sx={{ color: colors.textSecondary }}
-                            >
-                              <CloseIcon />
-                            </IconButton>
+                            {!guideline.isDefault && (
+                              <IconButton 
+                                onClick={() => removeGuideline(guideline.id)}
+                                sx={{ color: colors.textSecondary }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            )}
                           </Box>
                         ))}
                       </Box>
+                    )}
+
+                    {(!guidelines.some(g => g.isDefault) && guidelines.length === 0) && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".pdf,.ppt,.pptx"
+                          onChange={handleFileUpload}
+                          style={{ display: 'none' }}
+                          id="guidelines-upload"
+                        />
+                        <label htmlFor="guidelines-upload">
+                          <UploadZone>
+                            <CloudUploadIcon sx={{ fontSize: '4rem', color: colors.textSecondary, mb: 2 }} />
+                            <Typography variant="h6" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
+                              Drop your PDF here or click to browse
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                              Supports PDF, PPT, PPTX files
+                            </Typography>
+                          </UploadZone>
+                        </label>
+                      </>
+                    )}
+
+                    {guidelines.length > 0 && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".pdf,.ppt,.pptx"
+                          onChange={handleFileUpload}
+                          style={{ display: 'none' }}
+                          id="additional-guidelines-upload"
+                        />
+                        <label htmlFor="additional-guidelines-upload">
+                          <Button
+                            component="span"
+                            variant="outlined"
+                            startIcon={<CloudUploadIcon />}
+                            sx={{
+                              borderRadius: '16px',
+                              borderColor: 'rgba(255, 255, 255, 0.5)',
+                              color: colors.text,
+                              mb: 3,
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                borderColor: 'rgba(255, 255, 255, 0.8)'
+                              }
+                            }}
+                          >
+                            Add Additional Guidelines
+                          </Button>
+                        </label>
+                      </>
                     )}
 
                     {error && (
@@ -780,112 +1134,127 @@ const Home = () => {
         </Container>
       </HeroSection>
 
-      {/* Results Section */}
-      {showResults && (
-        <ResultsSection ref={resultsRef}>
-          <Container maxWidth="xl" sx={{ pt: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-              <Typography 
-                variant="h3" 
-                sx={{ 
-                  color: colors.textDark, 
-                  fontWeight: 800,
-                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
-                }}
-              >
-                Analysis Results
-              </Typography>
-              <Button 
-                variant="outlined" 
-                onClick={resetFlow}
-                startIcon={<RefreshIcon />}
-                sx={{ 
-                  color: colors.primary, 
-                  borderColor: colors.primary,
-                  borderRadius: '12px',
-                  '&:hover': { backgroundColor: colors.primary, color: 'white' }
-                }}
-              >
-                New Analysis
-              </Button>
-            </Box>
+      {/* Results Section with Jeton-style transition */}
+      <AnimatePresence>
+        {showResults && (
+          <ResultsSection
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ 
+              duration: 0.8, 
+              ease: [0.4, 0, 0.2, 1]
+            }}
+            ref={resultsRef}
+          >
+            <ResultsHeader>
+              <Container maxWidth="xl">
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography 
+                    variant="h3" 
+                    sx={{ 
+                      color: colors.textDark, 
+                      fontWeight: 800,
+                      fontFamily: '"Inter", "SF Pro Display", sans-serif',
+                    }}
+                  >
+                    Analysis Results
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    onClick={resetFlow}
+                    startIcon={<RefreshIcon />}
+                    sx={{ 
+                      color: colors.primary, 
+                      borderColor: colors.primary,
+                      borderRadius: '12px',
+                      '&:hover': { backgroundColor: colors.primary, color: 'white' }
+                    }}
+                  >
+                    New Analysis
+                  </Button>
+                </Box>
 
-            {getTopImages().length > 0 && (
-              <Box mb={6}>
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    color: colors.textDark, 
-                    fontWeight: 700, 
-                    mb: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2
-                  }}
-                >
-                  <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
-                  Top Performers (Score 7+)
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)', mb: 4 }}>
-                  {getTopImages().length} images perfectly match your brand guidelines
-                </Typography>
-              </Box>
-            )}
-
-            <Grid container spacing={3}>
-              {images.map((image, index) => {
-                const score = analyzedImages.get(image.filename);
-                const isAnalyzed = score !== undefined;
-                const isWinner = index === 0 && isAnalyzed && score >= 7;
-                
-                return (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ 
-                        duration: 0.5,
-                        type: "spring",
-                        stiffness: 80,
-                        damping: 15,
-                        delay: index * 0.1
+                {getTopImages().length > 0 && (
+                  <Box mt={4}>
+                    <Typography 
+                      variant="h4" 
+                      sx={{ 
+                        color: colors.textDark, 
+                        fontWeight: 700, 
+                        mb: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
                       }}
                     >
-                      <ImageCard 
-                        score={score}
-                        isAnalyzed={isAnalyzed}
-                        onClick={() => setSelectedImage(image)}
-                        sx={{ cursor: 'pointer' }}
+                      <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
+                      Top Performers (Score 7+)
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)' }}>
+                      {getTopImages().length} images perfectly match your brand guidelines
+                    </Typography>
+                  </Box>
+                )}
+              </Container>
+            </ResultsHeader>
+
+            <Container maxWidth="xl" sx={{ py: 4 }}>
+              <Grid container spacing={3}>
+                {images.map((image, index) => {
+                  const score = analyzedImages.get(image.filename);
+                  const isAnalyzed = score !== undefined;
+                  const isWinner = index === 0 && isAnalyzed && score >= 7;
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ 
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 80,
+                          damping: 15,
+                          delay: index * 0.1
+                        }}
                       >
-                        <CardMedia
-                          component="img"
-                          height="260"
-                          image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
-                          alt={image.description}
-                        />
-                        
-                        {isWinner && (
-                          <WinnerBadge>
-                            <EmojiEventsIcon sx={{ fontSize: '16px' }} />
-                            Winner
-                          </WinnerBadge>
-                        )}
-                        
-                        {isAnalyzed && (
-                          <ScoreBadge score={score}>
-                            {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
-                            {score}/10
-                          </ScoreBadge>
-                        )}
-                      </ImageCard>
-                    </motion.div>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Container>
-        </ResultsSection>
-      )}
+                        <ImageCard 
+                          score={score}
+                          isAnalyzed={isAnalyzed}
+                          onClick={() => setSelectedImage(image)}
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          <CardMedia
+                            component="img"
+                            height="260"
+                            image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
+                            alt={image.description}
+                          />
+                          
+                          {isWinner && (
+                            <WinnerBadge>
+                              <EmojiEventsIcon sx={{ fontSize: '16px' }} />
+                              Winner
+                            </WinnerBadge>
+                          )}
+                          
+                          {isAnalyzed && (
+                            <ScoreBadge score={score}>
+                              {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
+                              {score}/10
+                            </ScoreBadge>
+                          )}
+                        </ImageCard>
+                      </motion.div>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Container>
+          </ResultsSection>
+        )}
+      </AnimatePresence>
 
       {/* Floating Action Button */}
       {showResults && (
