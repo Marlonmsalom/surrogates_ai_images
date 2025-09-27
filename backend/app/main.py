@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 from typing import Dict, Set
+from pathlib import Path
 from .routes import images, guidelines, status
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -68,10 +69,17 @@ app.include_router(status.router, prefix="/api")
 @app.on_event("startup")
 async def startup_event():
     logger.info("Application starting up...")
-    os.makedirs("data/uploads", exist_ok=True)
-    os.makedirs("data/images", exist_ok=True)
-    os.makedirs("data/results", exist_ok=True)
-    logger.info("Directories created successfully")
+    
+    # Get project root path (go up from backend/app/)
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent
+    
+    # Create directories using pathlib
+    (project_root / "data" / "uploads").mkdir(parents=True, exist_ok=True)
+    (project_root / "data" / "images").mkdir(parents=True, exist_ok=True)
+    (project_root / "data" / "results").mkdir(parents=True, exist_ok=True)
+    
+    logger.info(f"Directories created successfully in: {project_root / 'data'}")
 
 if __name__ == "__main__":
     import uvicorn

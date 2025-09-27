@@ -8,120 +8,239 @@ import {
   Chip,
   Card,
   IconButton,
-  Collapse,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Dialog,
   DialogContent,
   Grid,
   CardMedia,
   Alert,
   InputAdornment,
-  LinearProgress
+  LinearProgress,
+  Fade,
+  Zoom
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchIcon from '@mui/icons-material/Search';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import StarIcon from '@mui/icons-material/Star';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import api from '../services/api';
+
+// Paleta moderna inspirada en Jeton
+const colors = {
+  primary: '#E91E63',         // Pink vibrante
+  secondary: '#FF7043',       // Coral/naranja
+  accent: '#F06292',          // Rosa más suave
+  background: '#FFFFFF',      // Blanco puro
+  surface: '#FFFFFF',         // Blanco
+  text: '#FFFFFF',            // Blanco para texto sobre gradiente
+  textDark: '#1A1A1A',        // Negro para texto sobre blanco
+  textSecondary: 'rgba(255,255,255,0.8)', // Blanco semi-transparente
+  success: '#4CAF50',         // Verde éxito
+  warning: '#FF9800',         // Naranja warning
+  error: '#F44336',           // Rojo error
+};
 
 const PageContainer = styled('div')({
   minHeight: '100vh',
-  backgroundColor: '#ffffff',
+  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
   position: 'relative',
-  zIndex: 1,
+  overflow: 'hidden',
+});
+
+const HeroSection = styled(Box)({
+  minHeight: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+  padding: '2rem',
+});
+
+const GlassCard = styled(Box)({
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(20px)',
+  borderRadius: '32px',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  padding: '3rem',
+  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+  width: '100%',
+  maxWidth: '700px',
 });
 
 const SearchField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
     borderRadius: '24px',
-    backgroundColor: '#f8f9fa',
-    border: '1px solid #dadce0',
-    fontSize: '16px',
-    fontFamily: 'system-ui, sans-serif',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: 'none',
+    fontSize: '18px',
+    fontFamily: '"Inter", "SF Pro Display", sans-serif',
+    fontWeight: 500,
+    height: '64px',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
     '& fieldset': {
       border: 'none',
     },
     '&:hover': {
-      backgroundColor: '#fff',
-      boxShadow: '0 1px 6px rgba(32,33,36,.28)',
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
     },
     '&.Mui-focused': {
-      backgroundColor: '#fff',
-      boxShadow: '0 1px 6px rgba(32,33,36,.28)',
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.2)',
     },
   },
 });
 
-const SearchButton = styled(Button)({
-  borderRadius: '24px',
+const ModernButton = styled(Button)({
+  borderRadius: '20px',
   textTransform: 'none',
-  fontWeight: 500,
-  padding: '10px 24px',
-  backgroundColor: '#202124',
-  color: 'white',
-  fontSize: '14px',
-  fontFamily: 'system-ui, sans-serif',
+  fontWeight: 700,
+  fontSize: '16px',
+  padding: '16px 32px',
+  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.primary} 100%)`,
+  color: colors.text,
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  height: '56px',
+  minWidth: '180px',
+  border: 'none',
+  boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: '#333333',
+    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
+    transform: 'translateY(-3px)',
+    boxShadow: '0 15px 40px rgba(233, 30, 99, 0.4)',
   },
   '&:disabled': {
-    backgroundColor: '#f8f9fa',
-    color: '#9aa0a6',
+    background: 'rgba(255, 255, 255, 0.3)',
+    color: 'rgba(255, 255, 255, 0.6)',
+    transform: 'none',
+    boxShadow: 'none',
   },
 });
 
-const OptionsButton = styled(IconButton)({
-  backgroundColor: '#f8f9fa',
-  border: '1px solid #dadce0',
-  borderRadius: '50%',
-  width: '40px',
-  height: '40px',
+const SecondaryButton = styled(Button)({
+  borderRadius: '20px',
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '16px',
+  padding: '16px 32px',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  color: colors.text,
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  height: '56px',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  backdropFilter: 'blur(10px)',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: '#e8eaed',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 10px 30px rgba(255, 255, 255, 0.2)',
+  },
+});
+
+const UploadZone = styled(Box)({
+  border: '2px dashed rgba(255, 255, 255, 0.4)',
+  borderRadius: '20px',
+  padding: '3rem',
+  textAlign: 'center',
+  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  backdropFilter: 'blur(10px)',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    border: '2px dashed rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    transform: 'translateY(-5px)',
   },
 });
 
 const StyledLinearProgress = styled(LinearProgress)({
   height: '8px',
   borderRadius: '4px',
-  backgroundColor: '#e8eaed',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
   '& .MuiLinearProgress-bar': {
     borderRadius: '4px',
-    backgroundColor: '#202124',
+    background: `linear-gradient(90deg, ${colors.text} 0%, rgba(255,255,255,0.8) 100%)`,
   },
 });
 
+const ResultsSection = styled(Box)({
+  backgroundColor: colors.background,
+  minHeight: '100vh',
+  paddingTop: '2rem',
+  paddingBottom: '4rem',
+});
+
 const ImageCard = styled(Card)(({ score, isAnalyzed }) => ({
-  borderRadius: '12px',
+  borderRadius: '20px',
   overflow: 'hidden',
-  transition: 'all 0.3s ease',
-  border: 'none',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-  backgroundColor: isAnalyzed 
-    ? score >= 7 ? '#f0f8f0' 
-    : score >= 5 ? '#fef8f0' 
-    : '#fef0f0'
-    : '#ffffff',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  border: isAnalyzed && score >= 7 
+    ? `3px solid ${colors.success}` 
+    : 'none',
+  boxShadow: isAnalyzed && score >= 7
+    ? `0 10px 40px rgba(76, 175, 80, 0.3)`
+    : '0 8px 25px rgba(0, 0, 0, 0.1)',
+  backgroundColor: colors.surface,
   position: 'relative',
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08)',
+    transform: 'translateY(-10px) scale(1.02)',
+    boxShadow: isAnalyzed && score >= 7
+      ? `0 20px 60px rgba(76, 175, 80, 0.4)`
+      : '0 15px 50px rgba(0, 0, 0, 0.15)',
   },
 }));
+
+const ScoreBadge = styled(Box)(({ score }) => ({
+  position: 'absolute',
+  top: '16px',
+  right: '16px',
+  backgroundColor: score >= 7 ? colors.success : score >= 5 ? colors.warning : colors.error,
+  color: colors.text,
+  borderRadius: '20px',
+  padding: '8px 16px',
+  fontWeight: 700,
+  fontSize: '16px',
+  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  zIndex: 2,
+  backdropFilter: 'blur(10px)',
+}));
+
+const WinnerBadge = styled(Box)({
+  position: 'absolute',
+  top: '16px',
+  left: '16px',
+  background: 'linear-gradient(135deg, #FFD700 0%, #FFA000 100%)',
+  color: '#1a1a1a',
+  borderRadius: '25px',
+  padding: '10px 16px',
+  fontWeight: 700,
+  fontSize: '14px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  boxShadow: '0 6px 20px rgba(255, 215, 0, 0.4)',
+  zIndex: 2,
+});
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [guidelines, setGuidelines] = useState([]);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [imageCount, setImageCount] = useState('20');
-  const [provider, setProvider] = useState('unsplash');
-  const [isSearching, setIsSearching] = useState(false);
+  const [currentStep, setCurrentStep] = useState('search'); // 'search', 'guidelines', 'analysis', 'results'
+  const [isProcessing, setIsProcessing] = useState(false);
   const [images, setImages] = useState([]);
   const [analyzedImages, setAnalyzedImages] = useState(new Map());
   const [selectedImage, setSelectedImage] = useState(null);
@@ -130,6 +249,15 @@ const Home = () => {
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
 
+  const handleNext = () => {
+    if (!searchQuery.trim()) {
+      setError('Please enter a search query');
+      return;
+    }
+    setError('');
+    setCurrentStep('guidelines');
+  };
+
   const handleFileUpload = (event) => {
     const files = Array.from(event.target.files);
     const newGuidelines = files.map(file => ({
@@ -137,7 +265,7 @@ const Home = () => {
       name: file.name,
       file: file,
     }));
-    setGuidelines(prev => [...prev, ...newGuidelines]);
+    setGuidelines(newGuidelines);
     setError('');
   };
 
@@ -145,25 +273,22 @@ const Home = () => {
     setGuidelines(prev => prev.filter(g => g.id !== id));
   };
 
-  const startProcess = async () => {
-    if (!searchQuery.trim()) {
-      setError('Please enter a search query');
-      return;
-    }
-    
+  const startAnalysis = async () => {
     if (guidelines.length === 0) {
-      setError('Please upload brand guidelines before starting');
+      setError('Please upload brand guidelines');
       return;
     }
 
     setError('');
-    setIsSearching(true);
+    setIsProcessing(true);
+    setCurrentStep('analysis');
     setImages([]);
     setAnalyzedImages(new Map());
     setProgress(0);
-    setProgressMessage('Starting...');
+    setProgressMessage('Starting analysis...');
     
     try {
+      // Upload guidelines
       setProgressMessage('Uploading guidelines...');
       setProgress(10);
       const formData = new FormData();
@@ -171,12 +296,13 @@ const Home = () => {
       const uploadResponse = await api.uploadGuideline(formData);
       const guidelinePath = uploadResponse.file_path;
 
-      setProgressMessage('Starting image download...');
+      // Download images
+      setProgressMessage('Downloading images...');
       setProgress(20);
       const response = await api.downloadImages({
         query: searchQuery,
-        provider: provider,
-        limit: parseInt(imageCount)
+        provider: 'unsplash',
+        limit: 20
       });
 
       setCurrentJobId(response.job_id);
@@ -193,15 +319,15 @@ const Home = () => {
         else if (data.status === 'completed' && data.result && data.result.images) {
           setImages(data.result.images);
           setProgress(70);
-          setProgressMessage('Images downloaded! Starting analysis...');
+          setProgressMessage('Images downloaded! Starting AI analysis...');
           
           setTimeout(() => {
-            startAnalysis(response.job_id, guidelinePath);
+            startImageAnalysis(response.job_id, guidelinePath);
           }, 1000);
         } 
         else if (data.status === 'analyzing') {
           setProgress(70 + (data.progress * 0.3));
-          setProgressMessage(`Analyzing images... ${data.progress}%`);
+          setProgressMessage(`Analyzing with AI... ${data.progress}%`);
         }
         else if (data.status === 'completed' && data.result && data.result.ratings) {
           const scoreMap = new Map();
@@ -221,17 +347,19 @@ const Home = () => {
           
           setProgress(100);
           setProgressMessage('Analysis complete!');
+          setCurrentStep('results');
+          setIsProcessing(false);
         }
       };
 
     } catch (error) {
-      console.error('Error starting process:', error);
-      setError('Failed to start process. Please try again.');
-      setIsSearching(false);
+      console.error('Error:', error);
+      setError('Analysis failed. Please try again.');
+      setIsProcessing(false);
     }
   };
 
-  const startAnalysis = async (jobId, guidelinePath) => {
+  const startImageAnalysis = async (jobId, guidelinePath) => {
     try {
       await api.analyzeImages({
         job_id: jobId,
@@ -243,185 +371,90 @@ const Home = () => {
     }
   };
 
-  return (
-    <PageContainer>
-      {!isSearching && (
-        <Box textAlign="center" pt={8} pb={6}>
-          <Typography 
-            variant="h1" 
-            sx={{
-              fontSize: { xs: '2.5rem', md: '4rem' },
-              fontWeight: 400,
-              color: '#202124',
-              fontFamily: 'system-ui, sans-serif',
-              mb: 2,
-            }}
-          >
-            Surrogates AI Images
-          </Typography>
-          <Typography 
-            variant="h5" 
-            sx={{
-              color: '#5f6368',
-              fontFamily: 'system-ui, sans-serif',
-              fontWeight: 400,
-            }}
-          >
-            Brand Guidelines Image Analyzer
-          </Typography>
-        </Box>
-      )}
+  const resetFlow = () => {
+    setCurrentStep('search');
+    setSearchQuery('');
+    setGuidelines([]);
+    setImages([]);
+    setAnalyzedImages(new Map());
+    setError('');
+    setIsProcessing(false);
+  };
 
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            position: isSearching ? 'fixed' : 'relative',
-            top: isSearching ? '24px' : 'auto',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '100%',
-            maxWidth: '600px',
-            zIndex: 1000,
-            transition: 'all 0.3s ease',
-          }}
-        >
-          <Box 
-            sx={{ 
-              backgroundColor: 'white',
-              borderRadius: '24px',
-              p: 3,
-              boxShadow: isSearching ? '0 2px 5px 1px rgba(64,60,67,.16)' : 'none',
-              border: isSearching ? 'none' : '1px solid #dadce0'
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={2} mb={2}>
-              <SearchField
-                fullWidth
-                placeholder="Search for images..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#9aa0a6' }} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.ppt,.pptx"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-                id="file-upload"
-              />
-              <label htmlFor="file-upload">
-                <OptionsButton component="span">
-                  <UploadFileIcon sx={{ fontSize: '20px', color: '#5f6368' }} />
-                </OptionsButton>
-              </label>
-              
-              <OptionsButton onClick={() => setShowAdvanced(!showAdvanced)}>
-                <SettingsIcon sx={{ fontSize: '20px', color: '#5f6368' }} />
-              </OptionsButton>
-            </Box>
+  const getTopImages = () => {
+    return images.filter(image => {
+      const score = analyzedImages.get(image.filename);
+      return score && score >= 7;
+    });
+  };
 
-            {guidelines.length > 0 && (
-              <Box display="flex" gap={1} mb={2} flexWrap="wrap">
-                {guidelines.map((guideline) => (
-                  <Chip
-                    key={guideline.id}
-                    label={`Guidelines: ${guideline.name}`}
-                    onDelete={() => removeGuideline(guideline.id)}
-                    sx={{
-                      backgroundColor: '#f0f0f0',
-                      color: '#202124',
-                      fontFamily: 'system-ui, sans-serif',
-                      '& .MuiChip-deleteIcon': { color: '#202124' }
-                    }}
-                  />
-                ))}
-              </Box>
-            )}
-
-            <Collapse in={showAdvanced}>
-              <Box display="flex" gap={2} mb={2}>
-                <TextField
-                  size="small"
-                  label="Number of images"
-                  value={imageCount}
-                  onChange={(e) => setImageCount(e.target.value)}
-                  sx={{ minWidth: 140 }}
-                />
-                
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Provider</InputLabel>
-                  <Select
-                    value={provider}
-                    onChange={(e) => setProvider(e.target.value)}
-                    label="Provider"
-                  >
-                    <MenuItem value="unsplash">Unsplash</MenuItem>
-                    <MenuItem value="pexels">Pexels</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            </Collapse>
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-
-            {isSearching && (
-              <Box mb={2}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: '#5f6368',
-                    fontFamily: 'system-ui, sans-serif',
-                    mb: 1
-                  }}
-                >
-                  {progressMessage}
-                </Typography>
-                <StyledLinearProgress 
-                  variant="determinate" 
-                  value={progress}
-                />
-              </Box>
-            )}
-
-            <SearchButton
-              fullWidth
-              onClick={startProcess}
-              disabled={isSearching}
-              startIcon={<PlayArrowIcon />}
+  if (currentStep === 'results') {
+    return (
+      <ResultsSection>
+        <Container maxWidth="xl" sx={{ pt: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                color: colors.textDark, 
+                fontWeight: 800,
+                fontFamily: '"Inter", "SF Pro Display", sans-serif',
+              }}
             >
-              {isSearching ? 'Processing...' : 'Start Process'}
-            </SearchButton>
+              Analysis Results
+            </Typography>
+            <Button 
+              variant="outlined" 
+              onClick={resetFlow}
+              sx={{ 
+                color: colors.primary, 
+                borderColor: colors.primary,
+                '&:hover': { backgroundColor: colors.primary, color: 'white' }
+              }}
+            >
+              New Analysis
+            </Button>
           </Box>
-        </Box>
 
-        <Box mt={isSearching ? 20 : 8}>
-          <Grid container spacing={2}>
+          {getTopImages().length > 0 && (
+            <Box mb={6}>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  color: colors.textDark, 
+                  fontWeight: 700, 
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                <EmojiEventsIcon sx={{ color: '#FFD700', fontSize: '2rem' }} />
+                Top Performers (Score 7+)
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(26, 26, 26, 0.7)', mb: 4 }}>
+                {getTopImages().length} images perfectly match your brand guidelines
+              </Typography>
+            </Box>
+          )}
+
+          <Grid container spacing={3}>
             {images.map((image, index) => {
               const score = analyzedImages.get(image.filename);
               const isAnalyzed = score !== undefined;
+              const isWinner = index === 0 && isAnalyzed && score >= 7;
               
               return (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={image.filename}>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ 
-                      duration: 0.4,
+                      duration: 0.5,
                       type: "spring",
-                      stiffness: 100,
-                      damping: 15
+                      stiffness: 80,
+                      damping: 15,
+                      delay: index * 0.1
                     }}
                   >
                     <ImageCard 
@@ -432,31 +465,23 @@ const Home = () => {
                     >
                       <CardMedia
                         component="img"
-                        height="200"
+                        height="260"
                         image={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(image.filename)}`}
                         alt={image.description}
                       />
                       
+                      {isWinner && (
+                        <WinnerBadge>
+                          <EmojiEventsIcon sx={{ fontSize: '16px' }} />
+                          Winner
+                        </WinnerBadge>
+                      )}
+                      
                       {isAnalyzed && (
-                        <Box
-                          position="absolute"
-                          top={12}
-                          right={12}
-                          sx={{
-                            backgroundColor: '#202124',
-                            color: 'white',
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            fontWeight: 700,
-                            fontSize: '18px',
-                            fontFamily: 'system-ui, sans-serif',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                            minWidth: '45px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {score}
-                        </Box>
+                        <ScoreBadge score={score}>
+                          {score >= 7 && <StarIcon sx={{ fontSize: '18px' }} />}
+                          {score}/10
+                        </ScoreBadge>
                       )}
                     </ImageCard>
                   </motion.div>
@@ -464,40 +489,297 @@ const Home = () => {
               );
             })}
           </Grid>
-        </Box>
-      </Container>
+        </Container>
 
-      <Dialog
-        open={!!selectedImage}
-        onClose={() => setSelectedImage(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogContent sx={{ p: 0, position: 'relative' }}>
-          <IconButton
-            onClick={() => setSelectedImage(null)}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              color: 'white',
-              zIndex: 1,
-              '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
-            }}
+        <Dialog
+          open={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '24px',
+              overflow: 'hidden',
+            }
+          }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative' }}>
+            <IconButton
+              onClick={() => setSelectedImage(null)}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                color: 'white',
+                zIndex: 1,
+                '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            
+            {selectedImage && (
+              <img
+                src={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(selectedImage.filename)}`}
+                alt={selectedImage.description}
+                style={{ width: '100%', height: 'auto' }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </ResultsSection>
+    );
+  }
+
+  return (
+    <PageContainer>
+      <HeroSection>
+        <Container maxWidth="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <CloseIcon />
-          </IconButton>
-          
-          {selectedImage && (
-            <img
-              src={`http://localhost:8000/api/image/${encodeURIComponent(currentJobId)}/${encodeURIComponent(selectedImage.filename)}`}
-              alt={selectedImage.description}
-              style={{ width: '100%', height: 'auto' }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+            <Box textAlign="center" mb={6}>
+              <Typography 
+                variant="h1" 
+                sx={{
+                  fontSize: { xs: '3rem', md: '5rem', lg: '6rem' },
+                  fontWeight: 800,
+                  color: colors.text,
+                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+                  mb: 2,
+                  lineHeight: 1.1,
+                }}
+              >
+                Surrogates AI Images
+              </Typography>
+              <Typography 
+                variant="h4" 
+                sx={{
+                  color: colors.textSecondary,
+                  fontFamily: '"Inter", "SF Pro Display", sans-serif',
+                  fontWeight: 400,
+                  fontSize: { xs: '1.2rem', md: '1.8rem' },
+                  maxWidth: '600px',
+                  mx: 'auto'
+                }}
+              >
+                Find perfect images that match your brand guidelines using AI
+              </Typography>
+            </Box>
+
+            <GlassCard>
+              <AnimatePresence mode="wait">
+                {currentStep === 'search' && (
+                  <motion.div
+                    key="search"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Typography 
+                      variant="h5" 
+                      sx={{ 
+                        color: colors.text, 
+                        fontWeight: 700, 
+                        mb: 3,
+                        textAlign: 'center'
+                      }}
+                    >
+                      What images are you looking for?
+                    </Typography>
+                    
+                    <Box display="flex" gap={2} mb={3}>
+                      <SearchField
+                        fullWidth
+                        placeholder="e.g., modern office, happy people, nature..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon sx={{ color: colors.primary, fontSize: '24px' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        onKeyPress={(e) => e.key === 'Enter' && handleNext()}
+                      />
+                    </Box>
+
+                    {error && (
+                      <Alert severity="error" sx={{ mb: 3, borderRadius: '16px' }}>
+                        {error}
+                      </Alert>
+                    )}
+
+                    <ModernButton
+                      fullWidth
+                      onClick={handleNext}
+                      disabled={!searchQuery.trim()}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Next Step
+                    </ModernButton>
+                  </motion.div>
+                )}
+
+                {currentStep === 'guidelines' && (
+                  <motion.div
+                    key="guidelines"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Typography 
+                      variant="h5" 
+                      sx={{ 
+                        color: colors.text, 
+                        fontWeight: 700, 
+                        mb: 3,
+                        textAlign: 'center'
+                      }}
+                    >
+                      Upload Your Brand Guidelines
+                    </Typography>
+
+                    {guidelines.length === 0 ? (
+                      <input
+                        type="file"
+                        accept=".pdf,.ppt,.pptx"
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                        id="guidelines-upload"
+                      />
+                    ) : null}
+
+                    {guidelines.length === 0 ? (
+                      <label htmlFor="guidelines-upload">
+                        <UploadZone>
+                          <CloudUploadIcon sx={{ fontSize: '4rem', color: colors.textSecondary, mb: 2 }} />
+                          <Typography variant="h6" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
+                            Drop your PDF here or click to browse
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                            Supports PDF, PPT, PPTX files
+                          </Typography>
+                        </UploadZone>
+                      </label>
+                    ) : (
+                      <Box>
+                        {guidelines.map((guideline) => (
+                          <Box 
+                            key={guideline.id}
+                            display="flex" 
+                            alignItems="center" 
+                            justifyContent="space-between"
+                            p={2}
+                            mb={2}
+                            sx={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                              borderRadius: '16px',
+                              backdropFilter: 'blur(10px)'
+                            }}
+                          >
+                            <Box display="flex" alignItems="center" gap={2}>
+                              <CheckCircleIcon sx={{ color: colors.success }} />
+                              <Typography sx={{ color: colors.text, fontWeight: 600 }}>
+                                {guideline.name}
+                              </Typography>
+                            </Box>
+                            <IconButton 
+                              onClick={() => removeGuideline(guideline.id)}
+                              sx={{ color: colors.textSecondary }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+                    {error && (
+                      <Alert severity="error" sx={{ mb: 3, borderRadius: '16px' }}>
+                        {error}
+                      </Alert>
+                    )}
+
+                    <Box display="flex" gap={2} mt={3}>
+                      <SecondaryButton
+                        onClick={() => setCurrentStep('search')}
+                        sx={{ flex: 1 }}
+                      >
+                        Back
+                      </SecondaryButton>
+                      <ModernButton
+                        onClick={startAnalysis}
+                        disabled={guidelines.length === 0}
+                        sx={{ flex: 2 }}
+                      >
+                        Start Analysis
+                      </ModernButton>
+                    </Box>
+                  </motion.div>
+                )}
+
+                {currentStep === 'analysis' && (
+                  <motion.div
+                    key="analysis"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Typography 
+                      variant="h5" 
+                      sx={{ 
+                        color: colors.text, 
+                        fontWeight: 700, 
+                        mb: 3,
+                        textAlign: 'center'
+                      }}
+                    >
+                      AI is analyzing your images...
+                    </Typography>
+
+                    <Box mb={4}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          color: colors.textSecondary,
+                          fontFamily: '"Inter", "SF Pro Display", sans-serif',
+                          fontWeight: 600,
+                          mb: 2,
+                          textAlign: 'center'
+                        }}
+                      >
+                        {progressMessage}
+                      </Typography>
+                      <StyledLinearProgress 
+                        variant="determinate" 
+                        value={progress}
+                        sx={{ height: '8px', borderRadius: '4px' }}
+                      />
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: colors.textSecondary,
+                          textAlign: 'center',
+                          mt: 1
+                        }}
+                      >
+                        {Math.round(progress)}% Complete
+                      </Typography>
+                    </Box>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </GlassCard>
+          </motion.div>
+        </Container>
+      </HeroSection>
     </PageContainer>
   );
 };
