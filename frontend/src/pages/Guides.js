@@ -15,7 +15,12 @@ import {
   Select,
   MenuItem,
   Dialog,
-  IconButton
+  IconButton,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+  Avatar
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,6 +30,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import ImageIcon from '@mui/icons-material/Image';
 import BrushIcon from '@mui/icons-material/Brush';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import api from '../services/api';
 
 const colors = {
@@ -60,12 +66,12 @@ const TopBar = styled(AppBar)({
 const NavButton = styled(Button)(({ active }) => ({
   color: colors.text,
   textTransform: 'none',
-  fontWeight: active ? 700 : 500,
+  fontWeight: active === 'true' ? 700 : 500,
   fontSize: '16px',
   padding: '10px 20px',
   borderRadius: '16px',
   marginLeft: '12px',
-  backgroundColor: active ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+  backgroundColor: active === 'true' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
   '&:hover': {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
@@ -126,12 +132,18 @@ const ModernButton = styled(Button)({
   },
 });
 
-const WebsiteCard = styled(Box)({
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+const WebsiteCard = styled(Card)({
   borderRadius: '24px',
-  overflow: 'hidden',
-  marginBottom: '2rem',
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+  transition: 'all 0.3s ease',
+  backgroundColor: colors.surface,
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  '&:hover': {
+    transform: 'translateY(-8px)',
+    boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
+  },
 });
 
 const SettingsDialog = styled(Dialog)(({ theme }) => ({
@@ -150,6 +162,23 @@ function Guides() {
   const [error, setError] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [websiteCount, setWebsiteCount] = useState(10);
+
+  const getFaviconUrl = (url) => {
+    try {
+      const domain = new URL(url).hostname;
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    } catch {
+      return '';
+    }
+  };
+
+  const getDomainName = (url) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
 
   const handleSearch = async () => {
     if (!keywords.trim()) {
@@ -174,10 +203,8 @@ function Guides() {
         setError(result.message || 'No websites found');
       }
     } catch (err) {
-      console.error('Full error:', err);
-      console.error('Response:', err.response);
-      console.error('Data:', err.response?.data);
       setError(err.response?.data?.detail || err.message || 'Error fetching inspiration');
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
@@ -185,7 +212,6 @@ function Guides() {
 
   return (
     <PageContainer>
-      {/* Navbar */}
       <TopBar position="static">
         <Container maxWidth="xl">
           <Toolbar sx={{ justifyContent: 'space-between', py: 2 }}>
@@ -232,7 +258,6 @@ function Guides() {
         </Container>
       </TopBar>
 
-      {/* Main Content */}
       <HeroSection>
         <Container maxWidth="lg">
           {websites.length === 0 && (
@@ -303,7 +328,6 @@ function Guides() {
             </GlassCard>
           )}
 
-          {/* Results */}
           {websites.length > 0 && (
             <Box sx={{ width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
@@ -327,57 +351,82 @@ function Guides() {
                 </Button>
               </Box>
 
-              <AnimatePresence>
+              <Grid container spacing={3}>
                 {websites.map((site, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <WebsiteCard>
-                      <Box p={3}>
-                        <Typography variant="h5" sx={{ color: colors.textDark, fontWeight: 700, mb: 1 }}>
-                          {site.url.replace('https://', '').replace('http://', '').split('/')[0]}
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: colors.textDark, mb: 2, opacity: 0.7 }}>
-                          {site.description}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: colors.primary, mb: 2 }}>
-                          <a href={site.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>
-                            {site.url}
-                          </a>
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '600px',
-                          backgroundColor: '#f5f5f5',
-                          position: 'relative',
-                        }}
-                      >
-                        <iframe
-                          src={site.url}
-                          title={site.url}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            border: 'none',
-                          }}
-                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                        />
-                      </Box>
-                    </WebsiteCard>
-                  </motion.div>
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <WebsiteCard>
+                        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                          <Box display="flex" alignItems="center" gap={2} mb={2}>
+                            <Avatar
+                              src={getFaviconUrl(site.url)}
+                              sx={{ 
+                                width: 48, 
+                                height: 48,
+                                backgroundColor: colors.accent
+                              }}
+                            >
+                              <BrushIcon />
+                            </Avatar>
+                            <Box>
+                              <Typography 
+                                variant="h6" 
+                                sx={{ 
+                                  color: colors.textDark, 
+                                  fontWeight: 700,
+                                  fontSize: '1.1rem'
+                                }}
+                              >
+                                {getDomainName(site.url)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              color: colors.textDark, 
+                              mb: 2, 
+                              opacity: 0.7,
+                              lineHeight: 1.6
+                            }}
+                          >
+                            {site.description}
+                          </Typography>
+                        </CardContent>
+                        
+                        <CardActions sx={{ p: 3, pt: 0 }}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            endIcon={<OpenInNewIcon />}
+                            href={site.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              borderRadius: '12px',
+                              textTransform: 'none',
+                              backgroundColor: colors.primary,
+                              '&:hover': { backgroundColor: colors.secondary }
+                            }}
+                          >
+                            Visit Website
+                          </Button>
+                        </CardActions>
+                      </WebsiteCard>
+                    </motion.div>
+                  </Grid>
                 ))}
-              </AnimatePresence>
+              </Grid>
             </Box>
           )}
         </Container>
       </HeroSection>
 
-      {/* Settings Dialog */}
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <Box p={2}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
