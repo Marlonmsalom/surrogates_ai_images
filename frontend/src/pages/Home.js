@@ -31,6 +31,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
@@ -45,6 +46,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ImageIcon from '@mui/icons-material/Image';
+import BrushIcon from '@mui/icons-material/Brush';
 import api from '../services/api';
 
 // Paleta original restaurada - Degradado rojo hermoso
@@ -394,6 +397,7 @@ const InfoSection = styled(Box)({
 });
 
 const Home = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [guidelines, setGuidelines] = useState([]);
   const [currentStep, setCurrentStep] = useState('search');
@@ -711,13 +715,18 @@ const Home = () => {
       <TopBar position="fixed">
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box display="flex" alignItems="center">
-            <LanguageIcon sx={{ color: colors.text, mr: 1 }} />
-            <Typography sx={{ color: colors.text, fontWeight: 600 }}>EN</Typography>
+            <Typography sx={{ color: colors.text, fontWeight: 700, fontSize: '20px' }}>
+              Surrogates AI
+            </Typography>
           </Box>
           
           <Box>
-            <HeaderButton>Log in</HeaderButton>
-            <SignUpButton>Sign up</SignUpButton>
+            <HeaderButton startIcon={<ImageIcon />} onClick={() => navigate('/')}>
+              Images
+            </HeaderButton>
+            <HeaderButton startIcon={<BrushIcon />} onClick={() => navigate('/guides')}>
+              Guides
+            </HeaderButton>
             <SettingsButton 
               onClick={() => setSettingsOpen(true)}
               sx={{ ml: 1 }}

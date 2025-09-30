@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 60000,
 });
 
 api.interceptors.response.use(
@@ -24,4 +24,5 @@ export default {
       'Content-Type': 'multipart/form-data',
     },
   }).then(res => res.data),
+  getInspiration: (data) => api.post('/inspiration', data).then(res => res.data),
 };

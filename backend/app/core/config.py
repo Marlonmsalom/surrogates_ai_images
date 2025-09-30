@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     UNSPLASH_API_KEY: str
     PEXELS_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
     
     MODEL_NAME: str = "gpt-4o"
     MAX_IMAGE_SIZE: tuple = (1024, 1024)
@@ -13,7 +14,7 @@ class Settings(BaseSettings):
     DOWNLOAD_TIMEOUT: int = 30
     
     class Config:
-        env_file = "../.env"
+        env_file = ".env"
         env_file_encoding = 'utf-8'
         case_sensitive = False
 

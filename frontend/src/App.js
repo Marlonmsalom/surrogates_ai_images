@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Home from './pages/Home';
+import Guides from './pages/Guides';
 import Analysis from './pages/Analysis';
 import Results from './pages/Results';
 
@@ -14,6 +15,7 @@ function App() {
       }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/guides" element={<Guides />} />
           <Route path="/analysis/:jobId" element={<Analysis />} />
           <Route path="/results/:jobId" element={<Results />} />
         </Routes>

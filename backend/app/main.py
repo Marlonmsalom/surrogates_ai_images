@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Dict, Set
 from pathlib import Path
-from .routes import images, guidelines, status
+from .routes import images, guidelines, status, inspiration
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -65,6 +65,7 @@ async def broadcast_to_job(job_id: str, message: dict):
 app.include_router(images.router, prefix="/api")
 app.include_router(guidelines.router, prefix="/api")
 app.include_router(status.router, prefix="/api")
+app.include_router(inspiration.router, prefix="/api", tags=["inspiration"])
 
 @app.on_event("startup")
 async def startup_event():
