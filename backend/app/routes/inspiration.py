@@ -39,24 +39,27 @@ def get_inspiration_from_gemini(keywords: List[str], api_key: str, count: int = 
         client_options = {"api_endpoint": "generativelanguage.googleapis.com"}
         genai.configure(api_key=api_key, client_options=client_options)
         model = genai.GenerativeModel('models/gemini-2.5-pro')
-        
         user_keywords = ", ".join(keywords)
         prompt = (
-            "You are an *international* web design and marketing curator with a focus on global trends. "
-            "Your task is to find "
-            f"{count} world-class websites that are true references in design and marketing.\n"
-            "They MUST meet these criteria:\n"
-            "1. The list MUST include the best designs, regardless of country or language, NOT just English-speaking ones. Actively search for top-tier examples from regions with best taste such as Asia, Scandinavia or Europe.\n"
-            "2. They must be currently live and operational.\n"
-            "3. They must have been launched or significantly redesigned in the last year (2024-2025).\n"
-            "4. They must be recognized for their innovative design, similar to winners on Awwwards, FWA, or CSSDA.\n"
-            f"5. Their aesthetic should reflect the following themes: '{user_keywords}'.\n"
-            "\n---CRITICAL INSTRUCTIONS---\n"
-            "Your response MUST be a valid JSON array of objects. Each object must contain two keys: "
-            "'url' (the website URL) and 'description' (a concise, one-sentence explanation of why "
-            "it's a great design reference based on the requested themes).\n"
-            "Example format: [{\"url\": \"https://example.com\", \"description\": \"This site uses bold typography and a minimalist layout to create a powerful user experience.\"}]"
-        )
+                "You are the best creative director in history with training from the world's top art & design schools "
+                "and deep experience across Architecture, Fine Arts, Design, Photography, Tech, and Fashion. "
+                "You have an exceptional sense for composition, color, style, and creative references.\n"
+                "Your task is to find " + str(count) + " world-class, moodboard-ready image links that precisely match the user's creative intention.\n"
+                "They MUST meet these criteria:\n"
+                "1. The search MUST span Google (with site restrictions), Pinterest, Unsplash, Pexels, Behance, and Tumblr, prioritizing editorial/filmic quality (NOT cosplay/AI).\n"
+                "2. Use Google with site filters when helpful (e.g., site:pinterest.com, site:behance.net, site:tumblr.com) and avoid rehosts or low-quality aggregators.\n"
+                "3. Balance sources: include ≥3 Pinterest links, ≥2 from Unsplash/Pexels combined, and ≥2 from Behance/Tumblr combined (if available).\n"
+                "4. Favor: teal–red or analogous cinematic palettes, shallow DOF, rim/back light, window/rain reflections, graphic composition, and/or material/texture plates — as appropriate to the brief.\n"
+                "5. Apply negative filters to ALL searches: -ai -midjourney -stable diffusion -overprocessed -cheesy -stocky -poster -quote.\n"
+                "6. Only include links that are currently live and display-friendly (embedding or hotlinking allowed by the source's standard terms). Always link to the ORIGINAL page (pin/post/project), not rehosts.\n"
+                "Rewrite & optimize the user's rough idea into a concise creative brief (tone, palette, lighting, composition, era, references, negative tastes), then search and return the results.\n"
+                "--- CRITICAL INSTRUCTIONS ---\n"
+                "Your response MUST be a valid JSON array of objects.\n"
+                "Each object MUST contain exactly two keys:\n"
+                "- 'url': the original page URL (Pin/Post/Project or stock item page).\n"
+                "- 'description': a concise, one-sentence justification of why this link fits the brief (e.g., lighting, palette, hair/texture/form/composition, or background plate).\n"
+                "User input (unqualified): '" + user_keywords + "'"
+            )
         
         generation_config = genai.types.GenerationConfig(response_mime_type="application/json")
         response = model.generate_content(prompt, generation_config=generation_config)

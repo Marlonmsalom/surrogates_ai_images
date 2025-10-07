@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: surrogates-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend/guides:/app/guides
+      - ./backend/temp_downloads:/app/temp_downloads
+      - ./backend/guidelines:/app/guidelines
+    networks:
+      - surrogates-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:8000
+    container_name: surrogates-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - surrogates-network
+
+networks:
+  surrogates-network:
+    driver: bridge

@@ -12,13 +12,16 @@ cp .env.example .env
 - UNSPLASH_API_KEY: Tu clave de Unsplash  
 - PEXELS_API_KEY: Tu clave de Pexels (opcional)
 
-3. Instala dependencias:
-cd backend && pip install -r requirements.txt
-cd ../frontend && npm install
+3. back
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
 
-4. Ejecuta la aplicación:
-Backend: cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-Frontend: cd frontend && npm start
+4. front
+cd frontend
+npm install
+npm start
 
 ## Funcionalidades
 
