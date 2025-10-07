@@ -1,0 +1,23 @@
+I am sending you {image_count} images along with brand guidelines. Please analyze each image and rate it from 0-10 based on brand compliance.
+
+BRAND GUIDELINES:
+{pdf_content}
+
+IMAGES TO ANALYZE:
+{filenames_text}
+
+TASK:
+Rate each image from 0 to 10 based on how well it complies with the brand guidelines:
+- 0 = Completely inconsistent with guidelines
+- 5 = Neutral/partially consistent  
+- 10 = Perfect compliance with guidelines
+
+RESPONSE FORMAT:
+Please provide your response in this EXACT format:
+
+RATINGS:
+{filename_example_1}: [score] - [brief explanation]
+{filename_example_2}: [score] - [brief explanation]
+...continue for ALL images
+
+Use the EXACT filename for each image.

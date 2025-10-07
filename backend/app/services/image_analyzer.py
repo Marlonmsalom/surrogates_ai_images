@@ -14,10 +14,25 @@ class ImageAnalyzer:
         self.project_root = Path(__file__).parent.parent.parent.parent
         self.images_dir = self.project_root / "data" / "images"
         self.uploads_dir = self.project_root / "data" / "uploads"
+        self.prompt_file = self.project_root / "prompts_images.txt"
+    
+    def _load_prompt_template(self) -> str:
+        if not self.prompt_file.exists():
+            error_msg = f"""
+ERROR: Prompt file not found at {self.prompt_file}
+Please create the file with the following command:
+
+cat > {self.prompt_file} << 'PROMPT_EOF'
+[Insert your custom prompt here with placeholders like {{image_count}}, {{pdf_content}}, {{filenames_text}}]
+PROMPT_EOF
+"""
+            raise FileNotFoundError(error_msg)
+        
+        with open(self.prompt_file, 'r') as f:
+            return f.read()
     
     async def analyze_images(self, guideline_path: str, job_id: str) -> Dict[str, Any]:
         try:
-            # Convert relative path to absolute path if needed
             if not Path(guideline_path).is_absolute():
                 guideline_full_path = self.project_root / guideline_path
             else:
@@ -27,7 +42,6 @@ class ImageAnalyzer:
             if not pdf_content:
                 return {"success": False, "message": "Could not read PDF content"}
             
-            # Use correct path to job images
             images_dir = self.images_dir / job_id
             if not images_dir.exists():
                 return {"success": False, "message": f"Images not found for job: {images_dir}"}
@@ -43,7 +57,6 @@ class ImageAnalyzer:
                 "message": f"Processing {len(image_files)} images..."
             })
             
-            # Procesar imágenes de forma optimizada
             images_base64, image_info = await self._process_images_async(image_files, job_id)
             
             if not images_base64:
@@ -57,10 +70,8 @@ class ImageAnalyzer:
             
             ai_provider = AIProviderFactory.create_provider("openai")
             
-            # Preparar prompt optimizado para lotes
             prompt = self._create_batch_prompt(pdf_content, image_info)
             
-            # Usar el nuevo sistema de análisis por lotes CON job_id
             result = await ai_provider.analyze_images(images_base64, prompt, job_id)
             
             await broadcast_to_job(job_id, {
@@ -72,7 +83,6 @@ class ImageAnalyzer:
             if result["success"]:
                 ratings = self._parse_ratings(result["response"], image_info)
                 
-                # Guardar resultados
                 await self._save_analysis_results(job_id, result, ratings)
                 
                 return {
@@ -94,7 +104,6 @@ class ImageAnalyzer:
             return {"success": False, "message": str(e)}
     
     async def _process_images_async(self, image_files: List[Path], job_id: str) -> tuple:
-        """Procesa imágenes de forma asíncrona y optimizada"""
         images_base64 = []
         image_info = []
         
@@ -102,7 +111,6 @@ class ImageAnalyzer:
         
         for i, img_path in enumerate(image_files):
             try:
-                # Progreso durante procesamiento de imágenes
                 progress = int(10 + (i / len(image_files)) * 20)
                 await broadcast_to_job(job_id, {
                     "status": "analyzing", 
@@ -121,7 +129,6 @@ class ImageAnalyzer:
                 else:
                     print(f"Failed to process image {i+1}: {img_path.name}")
                 
-                # Pequeña pausa para no bloquear el event loop
                 if i % 5 == 0:
                     await asyncio.sleep(0.1)
                     
@@ -133,36 +140,22 @@ class ImageAnalyzer:
         return images_base64, image_info
     
     def _create_batch_prompt(self, pdf_content: str, image_info: List[Dict]) -> str:
-        """Crea un prompt optimizado para procesamiento por lotes"""
         filenames_list = [img["filename"] for img in image_info]
         filenames_text = "\n".join([f"- {fname}" for fname in filenames_list])
         
-        return f"""I am sending you {len(image_info)} images along with brand guidelines. Please analyze each image and rate it from 0-10 based on brand compliance.
-
-BRAND GUIDELINES:
-{pdf_content}
-
-IMAGES TO ANALYZE:
-{filenames_text}
-
-TASK:
-Rate each image from 0 to 10 based on how well it complies with the brand guidelines:
-- 0 = Completely inconsistent with guidelines
-- 5 = Neutral/partially consistent  
-- 10 = Perfect compliance with guidelines
-
-RESPONSE FORMAT:
-Please provide your response in this EXACT format:
-
-RATINGS:
-{filenames_list[0]}: [score] - [brief explanation]
-{filenames_list[1] if len(filenames_list) > 1 else 'example.jpg'}: [score] - [brief explanation]
-...continue for ALL images
-
-Use the EXACT filename for each image."""
+        prompt_template = self._load_prompt_template()
+        
+        prompt = prompt_template.format(
+            image_count=len(image_info),
+            pdf_content=pdf_content,
+            filenames_text=filenames_text,
+            filename_example_1=filenames_list[0] if filenames_list else "example.jpg",
+            filename_example_2=filenames_list[1] if len(filenames_list) > 1 else "example2.jpg"
+        )
+        
+        return prompt
     
     async def _save_analysis_results(self, job_id: str, result: Dict, ratings: List[Dict]) -> None:
-        """Guarda los resultados del análisis"""
         try:
             results_dir = self.project_root / "data" / "results"
             results_dir.mkdir(exist_ok=True)
@@ -205,24 +198,20 @@ Use the EXACT filename for each image."""
             return None
     
     def _image_to_base64(self, image_path: str, max_size: tuple = (800, 800)) -> str:
-        """Optimizado para reducir tamaño y memoria"""
         try:
             print(f"Converting image to base64: {image_path}")
             
-            # Verificar que el archivo exista
             if not os.path.exists(image_path):
                 print(f"Image file does not exist: {image_path}")
                 return ""
             
             with Image.open(image_path) as img:
-                # Verificar que la imagen se abrió correctamente
                 print(f"Image opened: {img.size}, mode: {img.mode}")
                 
                 if img.mode in ('RGBA', 'P'):
                     img = img.convert('RGB')
                     print("Converted image to RGB")
                 
-                # Redimensionar si es necesario (tamaño reducido para OpenAI)
                 if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
                     original_size = img.size
                     img.thumbnail(max_size, Image.LANCZOS)
@@ -230,7 +219,6 @@ Use the EXACT filename for each image."""
                 
                 import io
                 buffer = io.BytesIO()
-                # Calidad reducida para optimizar tamaño
                 img.save(buffer, format='JPEG', quality=75, optimize=True)
                 
                 encoded_string = base64.b64encode(buffer.getvalue()).decode('utf-8')

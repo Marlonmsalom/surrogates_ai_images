@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -14,6 +12,8 @@ services:
       - ./backend/guides:/app/guides
       - ./backend/temp_downloads:/app/temp_downloads
       - ./backend/guidelines:/app/guidelines
+      - ./backend/prompts_images.txt:/prompts_images.txt
+      - ./backend/prompts_inspire.txt:/prompts_inspire.txt
     networks:
       - surrogates-network
 

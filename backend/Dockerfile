@@ -10,10 +10,11 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar todo el código
 COPY . .
 
-# Crear directorios necesarios
+COPY prompts_images.txt /prompts_images.txt
+COPY prompts_inspire.txt /prompts_inspire.txt
+
 RUN mkdir -p /app/guides /app/temp_downloads /app/guidelines
 
 EXPOSE 8000

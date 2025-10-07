@@ -8,6 +8,7 @@ import aiohttp
 import google.generativeai as genai
 import logging
 import traceback
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -22,7 +23,6 @@ class InspirationResponse(BaseModel):
     message: str = ""
 
 async def is_url_alive(url: str) -> bool:
-    """Verifica si una URL está activa de forma asíncrona"""
     try:
         timeout = aiohttp.ClientTimeout(total=3)
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -31,35 +31,34 @@ async def is_url_alive(url: str) -> bool:
     except:
         return False
 
+def load_prompt_template() -> str:
+    prompt_file = Path(__file__).parent.parent.parent / "prompts_inspire.txt"
+    
+    if not prompt_file.exists():
+        error_msg = f"""
+ERROR: Prompt file not found at {prompt_file}
+Please create the file with the following command:
+
+cat > {prompt_file} << 'PROMPT_EOF'
+[Insert your custom prompt here with placeholders like {{count}}, {{user_keywords}}]
+PROMPT_EOF
+"""
+        raise FileNotFoundError(error_msg)
+    
+    with open(prompt_file, 'r') as f:
+        return f.read()
+
 def get_inspiration_from_gemini(keywords: List[str], api_key: str, count: int = 10) -> List[Dict]:
-    """Llama a Gemini para obtener inspiración de diseño web"""
     try:
         logger.info(f"Contacting Gemini with keywords: {', '.join(keywords)}")
         
         client_options = {"api_endpoint": "generativelanguage.googleapis.com"}
         genai.configure(api_key=api_key, client_options=client_options)
         model = genai.GenerativeModel('models/gemini-2.5-pro')
+        
         user_keywords = ", ".join(keywords)
-        prompt = (
-                "You are the best creative director in history with training from the world's top art & design schools "
-                "and deep experience across Architecture, Fine Arts, Design, Photography, Tech, and Fashion. "
-                "You have an exceptional sense for composition, color, style, and creative references.\n"
-                "Your task is to find " + str(count) + " world-class, moodboard-ready image links that precisely match the user's creative intention.\n"
-                "They MUST meet these criteria:\n"
-                "1. The search MUST span Google (with site restrictions), Pinterest, Unsplash, Pexels, Behance, and Tumblr, prioritizing editorial/filmic quality (NOT cosplay/AI).\n"
-                "2. Use Google with site filters when helpful (e.g., site:pinterest.com, site:behance.net, site:tumblr.com) and avoid rehosts or low-quality aggregators.\n"
-                "3. Balance sources: include ≥3 Pinterest links, ≥2 from Unsplash/Pexels combined, and ≥2 from Behance/Tumblr combined (if available).\n"
-                "4. Favor: teal–red or analogous cinematic palettes, shallow DOF, rim/back light, window/rain reflections, graphic composition, and/or material/texture plates — as appropriate to the brief.\n"
-                "5. Apply negative filters to ALL searches: -ai -midjourney -stable diffusion -overprocessed -cheesy -stocky -poster -quote.\n"
-                "6. Only include links that are currently live and display-friendly (embedding or hotlinking allowed by the source's standard terms). Always link to the ORIGINAL page (pin/post/project), not rehosts.\n"
-                "Rewrite & optimize the user's rough idea into a concise creative brief (tone, palette, lighting, composition, era, references, negative tastes), then search and return the results.\n"
-                "--- CRITICAL INSTRUCTIONS ---\n"
-                "Your response MUST be a valid JSON array of objects.\n"
-                "Each object MUST contain exactly two keys:\n"
-                "- 'url': the original page URL (Pin/Post/Project or stock item page).\n"
-                "- 'description': a concise, one-sentence justification of why this link fits the brief (e.g., lighting, palette, hair/texture/form/composition, or background plate).\n"
-                "User input (unqualified): '" + user_keywords + "'"
-            )
+        prompt_template = load_prompt_template()
+        prompt = prompt_template.format(count=count, user_keywords=user_keywords)
         
         generation_config = genai.types.GenerationConfig(response_mime_type="application/json")
         response = model.generate_content(prompt, generation_config=generation_config)
@@ -78,7 +77,6 @@ def get_inspiration_from_gemini(keywords: List[str], api_key: str, count: int = 
 
 @router.post("/inspiration", response_model=InspirationResponse)
 async def get_inspiration(request: InspirationRequest):
-    """Obtiene inspiración de diseño web usando Gemini"""
     try:
         gemini_api_key = os.getenv("GEMINI_API_KEY")
         if not gemini_api_key:
